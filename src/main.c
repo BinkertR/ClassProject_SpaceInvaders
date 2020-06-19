@@ -16,8 +16,10 @@
 #include "TUM_Sound.h"
 #include "TUM_Utils.h"
 
+#include "game_objects.h"
 #include "manage_screen.h"
 #include "spaceship.h"
+#include "bullet.h"
 #include "manage_button_input.h"
 
 // #include "AsyncIO.h"
@@ -26,8 +28,7 @@
 #define mainGENERIC_STACK_SIZE ((unsigned short)2560)
 
 
-
-int init_tum_lib(char *argv[]){
+int init_tum_lib(char *argv[]) {
     /* do the initialization needed to use the tumDraw, tumEvent, tumSound*/
     printf("Initializing: \n");
 
@@ -59,12 +60,13 @@ int init_tum_lib(char *argv[]){
 }
 
 int create_tasks() {
-    spaceship_t *my_spaceship = SpaceShipInit();
-
+    // first create the game objects for all the tasks, so they can be passed to the tasks
+    game_objects_t *game_objects = game_objects_init();
+    
     //create all the tasks so they can be started by the scheduler
-    ManageScreenInit(my_spaceship);
+    ManageScreenInit(game_objects);
 
-    MangageButtonInit(my_spaceship);
+    MangageButtonInit(game_objects);
 
     return EXIT_SUCCESS;
 

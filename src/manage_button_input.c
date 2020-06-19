@@ -9,7 +9,9 @@
 
 #include "TUM_Event.h"
 
+#include "game_objects.h"
 #include "spaceship.h"
+#include "bullet.h"
 
 
 #define KEYCODE(CHAR) SDL_SCANCODE_##CHAR
@@ -42,7 +44,7 @@ void xGetButtonInput(void)
     }
 }
 
-void vManageButtonInputTask(spaceship_t *my_spaceship){
+void vManageButtonInputTask(game_objects_t *my_gameobjects){
 
 
     while (1) {
@@ -55,10 +57,14 @@ void vManageButtonInputTask(spaceship_t *my_spaceship){
             }
 
             if (buttons.buttons[KEYCODE(LEFT)]) {
-                SpaceShipMoveLeft(my_spaceship);
+                SpaceShipMoveLeft(my_gameobjects->my_spaceship);
             }
             if (buttons.buttons[KEYCODE(RIGHT)]) {
-                SpaceShipMoveRight(my_spaceship);
+                SpaceShipMoveRight(my_gameobjects->my_spaceship);
+            }
+            if (buttons.buttons[KEYCODE(SPACE)]) {
+                // shot bullet
+                BulletShoot(my_gameobjects->my_spaceship, my_gameobjects->my_bullet);
             }
 
             xSemaphoreGive(buttons.lock);

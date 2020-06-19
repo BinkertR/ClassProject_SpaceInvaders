@@ -20,7 +20,7 @@
 #define SHIP_SPEED      5
 
 #define SHIP_X_MAX      SCREEN_WIDTH - 10- SHIP_WIDTH / 2
-#define SHIP_X_MIN      10
+#define SHIP_X_MIN      10 + SHIP_WIDTH / 2
 #define SHIP_Y_CO       SCREEN_HEIGHT - 10 - SHIP_HEIGHT
 
 

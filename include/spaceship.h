@@ -1,3 +1,6 @@
+#include "FreeRTOS.h"
+#include "semphr.h"
+
 #include "TUM_Draw.h"
 
 #ifndef TEST_SPACESHIP_H

@@ -9,6 +9,7 @@
 
 #include "TUM_Draw.h"
 
+#include "game_objects.h"
 #include "spaceship.h"
 
 #define SCREEN_FREQUENCY    1000/60
@@ -18,8 +19,7 @@
 
 TaskHandle_t ManageScreenTask = NULL;
 
-void vManageScreenTask(spaceship_t *my_spaceship){
-
+void vManageScreenTask(game_objects_t *my_gameobjects){
 
     printf("Init Manage Screen");
 
@@ -45,15 +45,15 @@ void vManageScreenTask(spaceship_t *my_spaceship){
         vTaskDelayUntil( &xLastWakeTime, xFrequency );  // start this task every xFrequency millisecond
         tumDrawClear(Black); // Clear screen
 
-        SpaceShipDraw(my_spaceship);
+        SpaceShipDraw(my_gameobjects->my_spaceship);
 
         tumDrawUpdateScreen();
     }
     vTaskDelete(NULL); 
 }
 
-int ManageScreenInit(spaceship_t *my_spaceship) {
-    if (xTaskCreate(vManageScreenTask, "ManageScreenTask", mainGENERIC_STACK_SIZE * 2, my_spaceship,
+int ManageScreenInit(game_objects_t *my_game_objects) {
+    if (xTaskCreate(vManageScreenTask, "ManageScreenTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &ManageScreenTask) != pdPASS) {
         printf("Failed to create Tast MangaeButtonInit");
         return EXIT_FAILURE;
