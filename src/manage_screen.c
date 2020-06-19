@@ -11,11 +11,8 @@
 
 #include "my_structs.h"
 #include "spaceship.h"
+#include "bullet.h"
 
-#define SCREEN_FREQUENCY    1000/60
-
-#define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
-#define mainGENERIC_STACK_SIZE ((unsigned short)2560)
 
 TaskHandle_t ManageScreenTask = NULL;
 
@@ -28,9 +25,7 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
     const TickType_t xFrequency = SCREEN_FREQUENCY;
     //int framerate = 0;
     //char framerate_text[50];
-    //time_t lastWakeTime = clock();  
-
-    
+    //time_t lastWakeTime = clock();      
     
 
     // Needed such that Gfx library knows which thread controlls drawing
@@ -46,6 +41,8 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
         tumDrawClear(Black); // Clear screen
 
         SpaceShipDraw(my_gameobjects->my_spaceship);
+
+        BulletDraw(my_gameobjects->my_bullet);
 
         tumDrawUpdateScreen();
     }

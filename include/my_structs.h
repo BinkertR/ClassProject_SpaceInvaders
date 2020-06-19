@@ -7,16 +7,25 @@
 
 #define TEST_MYSTRUCTS_H  
 
+#define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
+#define mainGENERIC_STACK_SIZE ((unsigned short)2560)
+
+#define SCREEN_FREQUENCY    1000/60
+
 #define BULLET_HEIGHT   5
 #define BULLET_WIDTH    2
 #define BULLET_ACTIVE   1
-#define BULLET_PASSIVE 2
+#define BULLET_PASSIVE  2
+#define BULLET_SPEED    5
 
 #define SHIP_HEIGHT     10
 #define SHIP_WIDTH      50
 #define GUN_HEIGHT      10
 #define GUN_WIDHT       10
 #define SHIP_SPEED      5
+#define SHIP_X_MAX      SCREEN_WIDTH - 10- SHIP_WIDTH / 2
+#define SHIP_X_MIN      10 + SHIP_WIDTH / 2
+#define SHIP_Y_CO       SCREEN_HEIGHT - 10 - SHIP_HEIGHT
 
 #define PLAYER_LIFES    2
 

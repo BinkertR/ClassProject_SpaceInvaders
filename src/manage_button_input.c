@@ -16,9 +16,6 @@
 
 #define KEYCODE(CHAR) SDL_SCANCODE_##CHAR
 
-#define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
-#define mainGENERIC_STACK_SIZE ((unsigned short)2560)
-
 TaskHandle_t ManageButtonTask = NULL;
 
 typedef struct buttons_buffer {
@@ -69,7 +66,7 @@ void vManageButtonInputTask(game_objects_t *my_gameobjects){
 
             xSemaphoreGive(buttons.lock);
         }
-        vTaskDelay((TickType_t) (1000/30));
+        vTaskDelay((TickType_t) (SCREEN_FREQUENCY));
     }
 }
 

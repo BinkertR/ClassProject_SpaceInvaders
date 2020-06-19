@@ -11,13 +11,6 @@
 #include "spaceship.h"
 #include "manage_button_input.h"
 
-#define KEYCODE(CHAR) SDL_SCANCODE_##CHAR
-
-
-#define SHIP_X_MAX      SCREEN_WIDTH - 10- SHIP_WIDTH / 2
-#define SHIP_X_MIN      10 + SHIP_WIDTH / 2
-#define SHIP_Y_CO       SCREEN_HEIGHT - 10 - SHIP_HEIGHT
-
 int SpaceShipDraw(spaceship_t *my_spaceship) {
     // draw the spaceship according to its current position
     coord_t gun_draw_position, ship_draw_positoin;

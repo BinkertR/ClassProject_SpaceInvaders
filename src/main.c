@@ -44,10 +44,10 @@ int init_tum_lib(char *argv[]) {
         goto err_init_events;
     }
 
-    if (tumSoundInit(bin_folder_path)) {
+    /*if (tumSoundInit(bin_folder_path)) {
         PRINT_ERROR("Failed to initialize audio");
         goto err_init_audio;
-    }
+    }*/
 
     return EXIT_SUCCESS;
 
@@ -67,6 +67,8 @@ int create_tasks() {
     ManageScreenInit(game_objects);
 
     MangageButtonInit(game_objects);
+
+    BulletInitCalcTask(game_objects);
 
     return EXIT_SUCCESS;
 

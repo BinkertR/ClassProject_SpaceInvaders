@@ -12,6 +12,6 @@ int BulletShoot(spaceship_t *my_spaceship, bullet_t *my_bullet);
 
 int BulletDraw(bullet_t *my_bullet);
 
-void vCalcBulletTask(game_objects_t *my_gameobjects);
+int BulletInitCalcTask(game_objects_t *my_game_objects);
 
 #endif /*TEST_BULLET_H*/
