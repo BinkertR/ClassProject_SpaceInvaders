@@ -18,14 +18,13 @@
 
 #include "manage_screen.h"
 #include "spaceship.h"
+#include "manage_button_input.h"
 
 // #include "AsyncIO.h"
 
 #define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
 #define mainGENERIC_STACK_SIZE ((unsigned short)2560)
 
-// all the task handlers
-static TaskHandle_t ManageScreenTask = NULL;
 
 
 int init_tum_lib(char *argv[]){
@@ -60,17 +59,15 @@ int init_tum_lib(char *argv[]){
 }
 
 int create_tasks() {
+    spaceship_t *my_spaceship = SpaceShipInit();
+
     //create all the tasks so they can be started by the scheduler
-    if (xTaskCreate(vManageScreenTask, "ManageScreenTask", mainGENERIC_STACK_SIZE * 2, NULL,
-                    mainGENERIC_PRIORITY, &ManageScreenTask) != pdPASS) {
-        goto err_demotask;
-    }
+    ManageScreenInit(my_spaceship);
+
+    MangageButtonInit(my_spaceship);
 
     return EXIT_SUCCESS;
 
-    err_demotask:
-        //vSemaphoreDelete(buttons.lock);
-        return EXIT_FAILURE;
 }
 
 int main(int argc, char *argv[])

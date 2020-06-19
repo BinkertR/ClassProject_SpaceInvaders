@@ -1,9 +1,23 @@
 #include "TUM_Draw.h"
 
-struct spaceship {
-    coord_t position = {0};
-} spaceship_t;
+#ifndef TEST_SPACESHIP_H
 
-void vCalcSpaceShipTask(void *pvParameters)
+#define TEST_SPACESHIP_H  
 
-int SpaceShipDraw(spaceship_t *spaceship)
+typedef struct{
+    int x_position;
+    int lifes;
+    SemaphoreHandle_t lock;
+}spaceship_t;
+
+
+
+spaceship_t *SpaceShipInit();
+
+int SpaceShipDraw(spaceship_t *my_spaceship);
+
+int SpaceShipMoveRight(spaceship_t *my_spaceship);
+
+int SpaceShipMoveLeft(spaceship_t *my_spaceship);
+
+#endif /*TEST_SPACESHIP_H*/
