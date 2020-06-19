@@ -63,7 +63,7 @@ void vCalcBulletTask(game_objects_t *my_gameobjects){
         if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
             if (my_bullet->active == BULLET_ACTIVE) {
                 my_bullet->position.y -= BULLET_SPEED;
-                if (my_bullet->position.y < 10) {
+                if (my_bullet->position.y < PADDING) {
                     my_bullet->active = BULLET_PASSIVE;
                 }
             }

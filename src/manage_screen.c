@@ -12,6 +12,7 @@
 #include "my_structs.h"
 #include "spaceship.h"
 #include "bullet.h"
+#include "alien.h"
 
 
 TaskHandle_t ManageScreenTask = NULL;
@@ -25,7 +26,9 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
     const TickType_t xFrequency = SCREEN_FREQUENCY;
     //int framerate = 0;
     //char framerate_text[50];
-    //time_t lastWakeTime = clock();      
+    //time_t lastWakeTime = clock(); 
+
+    image_handle_t green_alien_img = AlienGreenLoadImg();     
     
 
     // Needed such that Gfx library knows which thread controlls drawing
@@ -43,6 +46,8 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
         SpaceShipDraw(my_gameobjects->my_spaceship);
 
         BulletDraw(my_gameobjects->my_bullet);
+
+        AlienDrawSingle(green_alien_img);
 
         tumDrawUpdateScreen();
     }
