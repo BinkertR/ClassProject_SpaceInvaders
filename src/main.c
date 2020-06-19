@@ -17,8 +17,9 @@
 #include "TUM_Utils.h"
 
 #include "manage_screen.h"
+#include "spaceship.h"
 
-#include "AsyncIO.h"
+// #include "AsyncIO.h"
 
 #define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
 #define mainGENERIC_STACK_SIZE ((unsigned short)2560)
@@ -75,6 +76,10 @@ int create_tasks() {
 int main(int argc, char *argv[])
 {
     if (init_tum_lib(argv) == EXIT_FAILURE) {return EXIT_FAILURE;}
+
+    if (create_tasks() == EXIT_FAILURE) {return EXIT_FAILURE;}
+
+    vTaskStartScheduler();
 
     return EXIT_SUCCESS;
 
