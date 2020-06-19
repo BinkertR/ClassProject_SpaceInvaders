@@ -16,15 +16,66 @@
 #include "TUM_Sound.h"
 #include "TUM_Utils.h"
 
+#include "manage_screen.h"
+
 #include "AsyncIO.h"
 
 #define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
 #define mainGENERIC_STACK_SIZE ((unsigned short)2560)
 
+// all the task handlers
+static TaskHandle_t ManageScreenTask = NULL;
 
+
+int init_tum_lib(char *argv[]){
+    /* do the initialization needed to use the tumDraw, tumEvent, tumSound*/
+    printf("Initializing: \n");
+
+    char *bin_folder_path = tumUtilGetBinFolderPath(argv[0]);
+
+    if (tumDrawInit(bin_folder_path)) {
+        PRINT_ERROR("Failed to initialize drawing");
+        goto err_init_drawing;
+    }
+
+    if (tumEventInit()) {
+        PRINT_ERROR("Failed to initialize events");
+        goto err_init_events;
+    }
+
+    if (tumSoundInit(bin_folder_path)) {
+        PRINT_ERROR("Failed to initialize audio");
+        goto err_init_audio;
+    }
+
+    return EXIT_SUCCESS;
+
+    err_init_audio:
+        tumEventExit();
+    err_init_events:
+        tumDrawExit();
+    err_init_drawing:
+        return EXIT_FAILURE;
+}
+
+int create_tasks() {
+    //create all the tasks so they can be started by the scheduler
+    if (xTaskCreate(vManageScreenTask, "ManageScreenTask", mainGENERIC_STACK_SIZE * 2, NULL,
+                    mainGENERIC_PRIORITY, &ManageScreenTask) != pdPASS) {
+        goto err_demotask;
+    }
+
+    return EXIT_SUCCESS;
+
+    err_demotask:
+        //vSemaphoreDelete(buttons.lock);
+        return EXIT_FAILURE;
+}
 
 int main(int argc, char *argv[])
 {
+    if (init_tum_lib(argv) == EXIT_FAILURE) {return EXIT_FAILURE;}
+
     return EXIT_SUCCESS;
 
 }

@@ -1,0 +1,2 @@
+
+void vManageScreenTask(void *pvParameters);
