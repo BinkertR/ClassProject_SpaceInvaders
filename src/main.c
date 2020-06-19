@@ -21,6 +21,7 @@
 #include "spaceship.h"
 #include "bullet.h"
 #include "manage_button_input.h"
+#include "alien.h"
 
 // #include "AsyncIO.h"
 
@@ -69,6 +70,8 @@ int create_tasks() {
     MangageButtonInit(game_objects);
 
     BulletInitCalcTask(game_objects);
+
+    AlienInitCalcSingleTask(game_objects);
 
     return EXIT_SUCCESS;
 

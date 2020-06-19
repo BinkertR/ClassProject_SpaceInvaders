@@ -2,10 +2,14 @@
 
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "task.h"
 
 #ifndef TEST_MYSTRUCTS_H
 
 #define TEST_MYSTRUCTS_H  
+
+#define	EXIT_FAILURE	1	/* Failing exit status.  */
+#define	EXIT_SUCCESS	0	/* Successful exit status.  */
 
 #define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
 #define mainGENERIC_STACK_SIZE ((unsigned short)2560)
@@ -53,12 +57,17 @@ typedef struct{
 typedef struct {
     coord_t position;
     int alien_score;
+    int active;
+    image_handle_t img_h;
     SemaphoreHandle_t lock;   
 }alien_t;
+
+alien_t *AlienEasyInt();
 
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
+    alien_t *my_alien;
 } game_objects_t;
 
 game_objects_t *game_objects_init();

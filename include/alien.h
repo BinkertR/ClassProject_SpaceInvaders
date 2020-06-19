@@ -2,4 +2,6 @@
 
 image_handle_t *AlienGreenLoadImg();
 
-int AlienDrawSingle(image_handle_t alien_img_handle);
+int AlienDrawSingle(alien_t *my_alien);
+
+int AlienInitCalcSingleTask(game_objects_t *my_game_objects);

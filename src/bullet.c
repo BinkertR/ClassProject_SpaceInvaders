@@ -57,9 +57,6 @@ void vCalcBulletTask(game_objects_t *my_gameobjects){
     my_bullet = my_gameobjects->my_bullet;
 
     while (1) {
-        tumEventFetchEvents(FETCH_EVENT_NONBLOCK | FETCH_EVENT_NO_GL_CHECK); // Query events backend for new events, ie. button presses
-        xGetButtonInput(); // Update global input
-
         if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
             if (my_bullet->active == BULLET_ACTIVE) {
                 my_bullet->position.y -= BULLET_SPEED;

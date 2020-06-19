@@ -27,8 +27,6 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
     //int framerate = 0;
     //char framerate_text[50];
     //time_t lastWakeTime = clock(); 
-
-    image_handle_t green_alien_img = AlienGreenLoadImg();     
     
 
     // Needed such that Gfx library knows which thread controlls drawing
@@ -47,7 +45,7 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
 
         BulletDraw(my_gameobjects->my_bullet);
 
-        AlienDrawSingle(green_alien_img);
+        AlienDrawSingle(my_gameobjects->my_alien);
 
         tumDrawUpdateScreen();
     }
