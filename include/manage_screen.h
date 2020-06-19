@@ -1,4 +1,3 @@
-#include "game_objects.h"
 
 #ifndef TEST_MANAGESCREEN_H
 

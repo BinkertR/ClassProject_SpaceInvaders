@@ -9,7 +9,7 @@
 
 #include "TUM_Draw.h"
 
-#include "game_objects.h"
+#include "my_structs.h"
 #include "spaceship.h"
 
 #define SCREEN_FREQUENCY    1000/60

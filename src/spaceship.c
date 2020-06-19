@@ -7,34 +7,16 @@
 
 #include "TUM_Draw.h"
 
+#include "my_structs.h"
 #include "spaceship.h"
 #include "manage_button_input.h"
 
 #define KEYCODE(CHAR) SDL_SCANCODE_##CHAR
 
-#define SHIP_HEIGHT     10
-#define SHIP_WIDTH      50
-#define GUN_HEIGHT      10
-#define GUN_WIDHT       10
-#define PLAYER_LIFES    2
-#define SHIP_SPEED      5
 
 #define SHIP_X_MAX      SCREEN_WIDTH - 10- SHIP_WIDTH / 2
 #define SHIP_X_MIN      10 + SHIP_WIDTH / 2
 #define SHIP_Y_CO       SCREEN_HEIGHT - 10 - SHIP_HEIGHT
-
-
-spaceship_t *SpaceShipInit() {
-    spaceship_t *my_spaceship = pvPortMalloc(sizeof(spaceship_t));
-    int x = 0;
-    x = SCREEN_WIDTH / 2 - SHIP_WIDTH / 2;
-    //my_spaceship->x_position = pvPortMalloc(sizeof(int));
-    my_spaceship->x_position = x;
-    my_spaceship->lifes = PLAYER_LIFES;
-    my_spaceship->lock = xSemaphoreCreateMutex(); // Locking mechanism
-
-    return my_spaceship;
-}
 
 int SpaceShipDraw(spaceship_t *my_spaceship) {
     // draw the spaceship according to its current position

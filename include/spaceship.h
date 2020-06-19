@@ -7,16 +7,6 @@
 
 #define TEST_SPACESHIP_H  
 
-typedef struct{
-    int x_position;
-    int lifes;
-    SemaphoreHandle_t lock;
-}spaceship_t;
-
-
-
-spaceship_t *SpaceShipInit();
-
 int SpaceShipDraw(spaceship_t *my_spaceship);
 
 int SpaceShipMoveRight(spaceship_t *my_spaceship);

@@ -16,7 +16,7 @@
 #include "TUM_Sound.h"
 #include "TUM_Utils.h"
 
-#include "game_objects.h"
+#include "my_structs.h"
 #include "manage_screen.h"
 #include "spaceship.h"
 #include "bullet.h"

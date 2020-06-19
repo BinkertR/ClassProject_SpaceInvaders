@@ -9,7 +9,7 @@
 
 #include "TUM_Event.h"
 
-#include "game_objects.h"
+#include "my_structs.h"
 #include "spaceship.h"
 #include "bullet.h"
 

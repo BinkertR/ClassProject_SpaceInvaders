@@ -8,26 +8,8 @@
 #include "TUM_Draw.h"
 #include "TUM_Event.h"
 
-#include "game_objects.h"
-#include "bullet.h"
-#include "spaceship.h"
+#include "my_structs.h"
 
-#define BULLET_HEIGHT   5
-#define BULLET_WIDTH    2
-
-#define BULLET_ACTIVE   1
-#define BULLET_PASSIVE 2
-
-
-bullet_t *BulletInit() {
-    bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
-    my_bullet->position.x = 0;
-    my_bullet->position.y = 0;
-    my_bullet->active = BULLET_PASSIVE;
-    my_bullet->lock = xSemaphoreCreateMutex(); // Locking mechanism
-
-    return my_bullet;
-}
 
 int BulletDraw(bullet_t *my_bullet) {
     // draw the bullet according to its current position (which is update via the manage_button task)
@@ -74,7 +56,7 @@ void vCalcBulletTask(game_objects_t *my_gameobjects){
         tumEventFetchEvents(FETCH_EVENT_NONBLOCK | FETCH_EVENT_NO_GL_CHECK); // Query events backend for new events, ie. button presses
         xGetButtonInput(); // Update global input
 
-        if (xSemaphoreTake(my_gameobjects->my_bullet->lock my_bullet.lock, 0) == pdTRUE) {
+        if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
             if (my_gameobjects->my_bullet->active == BULLET_ACTIVE) {
                 // move bullet
             }
