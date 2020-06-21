@@ -6,7 +6,7 @@
 
 #define ALIEN_EASY_IMG "../img/alien_green.png"
 #define ALIEN_MIDDLE_IMG "../img/alien_yellow.png"
-#define ALIEN_HARD_IMG "../img/alien_ping.png"
+#define ALIEN_HARD_IMG "../img/alien_pink.png"
 
 TaskHandle_t AlienCalcSingleTask = NULL;
 
@@ -21,7 +21,7 @@ image_handle_t AlienLoadImg(int alien_score) {
     } else {
         alien_img = tumDrawLoadImage(ALIEN_HARD_IMG);
     }
-    if (alien_img == -1) {
+    if (alien_img == NULL) {
         printf("Failed to load alien img");
         return 1;
     }
@@ -50,8 +50,8 @@ int AlienDrawColumn(alien_t **alien_column_start) {
     alien_t **current_alien = alien_column_start;
 
     for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
-        current_alien = alien_column_start + 1;
-        //AlienDrawSingle(current_alien);
+        current_alien = alien_column_start + i;
+        AlienDrawSingle(*current_alien);
     }
     return 0;
 }

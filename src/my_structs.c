@@ -48,7 +48,7 @@ alien_t *AlienInit(int alien_score) {
 }
 
 alien_t **AlienInitColumn() {
-    alien_t *column[ALIENS_PER_COLUMN];
+    alien_t **column = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_COLUMN);
 
     column[0] = AlienInit(ALIEN_HARD);
     column[1] = AlienInit(ALIEN_MIDDLE);
@@ -57,17 +57,9 @@ alien_t **AlienInitColumn() {
     column[4] = AlienInit(ALIEN_EASY);
 
     for (int i = 1; i < ALIENS_PER_COLUMN; i++) {
-        column[i]->position.y += 15 * i;
+        column[i]->position.y += (ALIEN_WIDTH + 10) * i;
     }
-    alien_t **alien_column_start = &(column[0]);
-    alien_t **current_alien = alien_column_start;
-
-    for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
-        current_alien = alien_column_start + i;
-        //AlienDrawSingle(current_alien);
-    }
-    current_alien = &(column[0]);
-    return current_alien;
+    return column;
 
 }
 
