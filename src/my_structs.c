@@ -38,8 +38,8 @@ alien_t *AlienEasyInt() {
 
 alien_t *AlienInit(int alien_score) {
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
-    my_alien->position.x = 50;
-    my_alien->position.y = 50;
+    my_alien->position.x = ALIEN_START_X;
+    my_alien->position.y = ALIEN_START_Y;
     my_alien->alien_score = alien_score;
     my_alien->active = BULLET_ACTIVE;  // init to active because it should be display from the beginning
     my_alien->img_h = AlienLoadImg(alien_score);
@@ -47,7 +47,8 @@ alien_t *AlienInit(int alien_score) {
     return my_alien;
 }
 
-alien_t **AlienInitColumn() {
+alien_t **AlienInitColumn(int x_position) {
+    // initialize a column with 5 aliens and return the pointer to the first object.
     alien_t **column = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_COLUMN);
 
     column[0] = AlienInit(ALIEN_HARD);
@@ -56,18 +57,18 @@ alien_t **AlienInitColumn() {
     column[3] = AlienInit(ALIEN_EASY);
     column[4] = AlienInit(ALIEN_EASY);
 
-    for (int i = 1; i < ALIENS_PER_COLUMN; i++) {
+    for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
+        column[i]->position.x = x_position;
         column[i]->position.y += (ALIEN_WIDTH + 10) * i;
     }
     return column;
 
 }
 
-alien_t *AlienInitRow() {
-    alien_t *row[ALIENS_PER_ROW];
-    int i = 0;
-    for (i; i < ALIENS_PER_ROW; i++) {  //sizeof(row) / sizeof(alien_t)
-        row[i] = AlienEasyInt();
+alien_t ***AlienInitMatrix() {
+    alien_t ***row = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_ROW);
+    for (int i = 0; i < ALIENS_PER_ROW; i++) {  //sizeof(row) / sizeof(alien_t)
+        row[i] = AlienInitColumn(ALIEN_START_Y + (ALIEN_WIDTH + 10) * i);
     }
     return row;
 }
@@ -78,6 +79,7 @@ game_objects_t *game_objects_init() {
     game_objects->my_bullet = BulletInit(); 
     game_objects->my_alien = AlienInit(ALIEN_EASY);   
     //alien_t *column = AlienInitColumn();
-    game_objects->alien_column_start = AlienInitColumn();
+    //game_objects->alien_column_start = AlienInitColumn();
+    game_objects->alien_matrix = AlienInitMatrix();
     return game_objects;
 }

@@ -40,7 +40,9 @@
 #define ALIEN_HARD      30
 #define ALIENS_PER_ROW  8
 #define ALIENS_PER_COLUMN   5
-#define ALIEN_WIDTH     30
+#define ALIEN_WIDTH     40
+#define ALIEN_START_X   50
+#define ALIEN_START_Y   50
 
 typedef struct{
     coord_t position;
@@ -67,8 +69,9 @@ alien_t *AlienEasyInt();
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
-    alien_t *my_alien;
-    alien_t **alien_column_start;
+    alien_t *my_alien;              //just for testing
+    alien_t **alien_column_start;  //just for testing
+    alien_t ***alien_matrix;
 } game_objects_t;
 
 game_objects_t *game_objects_init();

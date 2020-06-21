@@ -6,4 +6,6 @@ int AlienDrawSingle(alien_t *my_alien);
 
 int AlienDrawColumn(alien_t *alien_column_start);
 
+int AlienDrawMatrix(alien_t ***alien_matrix_start);
+
 int AlienInitCalcSingleTask(game_objects_t *my_game_objects);

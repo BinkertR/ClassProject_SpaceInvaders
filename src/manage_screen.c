@@ -46,7 +46,8 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
         BulletDraw(my_gameobjects->my_bullet);
 
         //AlienDrawSingle(my_gameobjects->my_alien);
-        AlienDrawColumn(my_gameobjects->alien_column_start);
+        //AlienDrawColumn(my_gameobjects->alien_column_start);
+        AlienDrawMatrix(my_gameobjects->alien_matrix);
 
         tumDrawUpdateScreen();
     }

@@ -23,7 +23,7 @@ image_handle_t AlienLoadImg(int alien_score) {
     }
     if (alien_img == NULL) {
         printf("Failed to load alien img");
-        return 1;
+        return NULL;
     }
     img_width = tumDrawGetLoadedImageWidth(alien_img);
     scale_factor = ALIEN_WIDTH * 1.0 / img_width;
@@ -52,6 +52,16 @@ int AlienDrawColumn(alien_t **alien_column_start) {
     for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
         current_alien = alien_column_start + i;
         AlienDrawSingle(*current_alien);
+    }
+    return 0;
+}
+
+int AlienDrawMatrix(alien_t ***alien_matrix_start) {
+    alien_t ***current_row = alien_matrix_start;
+
+    for (int i = 0; i < ALIENS_PER_ROW; i++) {
+        current_row = alien_matrix_start + i;
+        AlienDrawColumn(*current_row);
     }
     return 0;
 }
