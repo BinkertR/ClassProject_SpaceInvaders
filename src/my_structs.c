@@ -8,7 +8,7 @@ bullet_t *BulletInit() {
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
     my_bullet->position.x = 0;
     my_bullet->position.y = 0;
-    my_bullet->active = BULLET_PASSIVE;
+    my_bullet->active = OBJ_PASSIVE;
     my_bullet->lock = xSemaphoreCreateMutex(); // Locking mechanism
 
     return my_bullet;
@@ -30,7 +30,7 @@ alien_t *AlienInit(int alien_score) {
     my_alien->position.x = ALIEN_START_X;
     my_alien->position.y = ALIEN_START_Y;
     my_alien->alien_score = alien_score;
-    my_alien->active = BULLET_ACTIVE;  // init to active because it should be display from the beginning
+    my_alien->active = OBJ_ACTIVE;  // init to active because it should be display from the beginning
     my_alien->img_h = AlienLoadImg(alien_score);
     my_alien->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return my_alien;
@@ -47,7 +47,8 @@ alien_column_t *AlienInitColumn(int x_position) {
     column->first_alien[3] = AlienInit(ALIEN_EASY);
     column->first_alien[4] = AlienInit(ALIEN_EASY);
 
-    column->active_aliens = ALIENS_PER_COLUMN - 1;
+    column->lowest_active_alien = ALIENS_PER_COLUMN - 1;
+    column->active = OBJ_ACTIVE;
 
     for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
         column->first_alien[i]->position.x = x_position;
@@ -67,6 +68,7 @@ alien_row_t *AlienInitMatrix() {
     }
     row->leftest_active_column = 0;
     row->rightest_active_column = ALIENS_PER_ROW - 1;
+    return row;
 }
 
 game_objects_t *game_objects_init() {

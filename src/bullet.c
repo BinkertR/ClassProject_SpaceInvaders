@@ -17,7 +17,7 @@ int BulletDraw(bullet_t *my_bullet) {
     coord_t bullet_draw_position;
 
     if (xSemaphoreTake((*my_bullet).lock, 0) == pdTRUE) {
-        if (my_bullet->active == BULLET_ACTIVE) {
+        if (my_bullet->active == OBJ_ACTIVE) {
             
             bullet_draw_position.x = my_bullet->position.x - BULLET_WIDTH / 2;
             bullet_draw_position.y = my_bullet->position.y - BULLET_HEIGHT / 2;
@@ -35,8 +35,8 @@ int BulletDraw(bullet_t *my_bullet) {
 
 int BulletShoot(spaceship_t *my_spaceship, bullet_t *my_bullet) {
     if (xSemaphoreTake((*my_bullet).lock, 0) == pdTRUE) {
-        if (my_bullet->active == BULLET_PASSIVE) {
-            my_bullet->active = BULLET_ACTIVE;
+        if (my_bullet->active == OBJ_PASSIVE) {
+            my_bullet->active = OBJ_ACTIVE;
             if (xSemaphoreTake((*my_spaceship).lock, 0) == pdTRUE) {
                 (*my_bullet).position.x = my_spaceship->x_position;  // shoot the bullet from the center of the x of the spaceship
                 (*my_bullet).position.y = SHIP_Y_CO - SHIP_HEIGHT - GUN_HEIGHT - BULLET_HEIGHT / 2;
@@ -58,10 +58,10 @@ void vCalcBulletTask(game_objects_t *my_gameobjects){
 
     while (1) {
         if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
-            if (my_bullet->active == BULLET_ACTIVE) {
+            if (my_bullet->active == OBJ_ACTIVE) {
                 my_bullet->position.y -= BULLET_SPEED;
                 if (my_bullet->position.y < PADDING) {
-                    my_bullet->active = BULLET_PASSIVE;
+                    my_bullet->active = OBJ_PASSIVE;
                 }
             }
             xSemaphoreGive(my_bullet->lock);

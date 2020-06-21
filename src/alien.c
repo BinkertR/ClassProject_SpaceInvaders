@@ -58,7 +58,7 @@ int AlienDrawSingle(alien_t *my_alien) {
     alien_draw_position.x = my_alien->position.x - ALIEN_WIDTH / 2;
     alien_draw_position.y = my_alien->position.y - ALIEN_WIDTH / 2;  //TODO Make this to alien Height
     if (xSemaphoreTake((*my_alien).lock, 0) == pdTRUE) {
-        if (my_alien->active == BULLET_ACTIVE) {
+        if (my_alien->active == OBJ_ACTIVE) {
             img = my_alien->img_h;
             tumDrawLoadedImage(img, alien_draw_position.x, alien_draw_position.y);
         }
@@ -97,13 +97,13 @@ int check_hit(alien_t *my_alien, bullet_t *my_bullet) {
 
 int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
     if (xSemaphoreTake(my_alien->lock, 0) == pdTRUE) {
-            if (my_alien->active == BULLET_ACTIVE) {
+            if (my_alien->active == OBJ_ACTIVE) {
                 if (xSemaphoreTake(my_bullet->lock, 0) == pdTRUE) {
-                    if (my_bullet->active == BULLET_ACTIVE) {
+                    if (my_bullet->active == OBJ_ACTIVE) {
                         //if the bullet hits the alien
                         if (check_hit(my_alien, my_bullet) == 1) {
-                            my_alien->active = BULLET_PASSIVE;
-                            my_bullet->active = BULLET_PASSIVE;
+                            my_alien->active = OBJ_PASSIVE;
+                            my_bullet->active = OBJ_PASSIVE;
                         } 
                     }                    
                     xSemaphoreGive(my_bullet->lock);
@@ -119,20 +119,43 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     alien_row_t *current_row = pvPortMalloc(sizeof(alien_row_t));
     alien_column_t *current_column = pvPortMalloc(sizeof(alien_column_t));
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
-    
-    my_bullet = my_gameobjects->my_bullet;
-    int matrix_size_x = ALIENS_PER_ROW, matrix_size_y = ALIENS_PER_COLUMN;
 
+    int step_in_x = ALIEN_X_SPEED, step_in_y = 0, current_min_x = NULL, current_max_x = NULL;  // how fare the aliens should step into each direction
+
+    my_bullet = my_gameobjects->my_bullet;
     current_row = my_gameobjects->alien_matrix;
 
     while (1) {
-        for (int i = 0; i < matrix_size_x; i++) {  // iterate through rows
-            //current_row = &(my_gameobjects->alien_matrix[i]);
+        //set the moving steps, so that they can be applied to each alien during the bullet iteration
+        current_min_x = my_gameobjects->alien_matrix->first_column[current_row->leftest_active_column]->first_alien[0]->position.x;
+        current_max_x = my_gameobjects->alien_matrix->first_column[current_row->rightest_active_column]->first_alien[0]->position.x;
+        if (current_min_x - ALIEN_WIDTH / 2 < ALIEN_MIN_X) {  // if the aliens are on the left border change direction
+            step_in_x = + ALIEN_X_SPEED;
+            step_in_y = 0;
+        } else if (current_max_x + ALIEN_WIDTH / 2 > ALIEN_MAX_X) {  // if the aliens are on the left border change direction and move aliens one down
+            step_in_x = - ALIEN_X_SPEED;
+            step_in_y = ALIEN_Y_SPEED;
+        } else {  // continue moving aliens in the same direction, but stop going down
+            step_in_y = 0;
+        }
+
+        // check for each alien, if it got hit by the bullet
+        for (int i = current_row->leftest_active_column; i <= current_row->rightest_active_column; i++) {  // iterate through rows
             current_column = my_gameobjects->alien_matrix->first_column[i];
-            for (int k = 0; k < matrix_size_y; k++) { // iterate through columns
+            for (int k = 0; k < ALIENS_PER_COLUMN; k++) { // iterate through columns
                 my_alien = my_gameobjects->alien_matrix->first_column[i]->first_alien[k];
-                //current_column = *current_row->first_column + k;
-                AlienCheckBullet(my_alien, my_bullet);
+                if (my_alien->active == OBJ_ACTIVE) {
+                    AlienCheckBullet(my_alien, my_bullet);
+                if (my_alien->active == OBJ_PASSIVE) {  // if the alien died keep track of it to calc alien_bullets and moving
+                    current_column->lowest_active_alien -= 1;  // should also be k-1
+                    if (current_column->lowest_active_alien == -1) {  //if all aliens in this column died.
+                        // to do 
+                    }
+                }
+                // move alien according to the previously calculated steps
+                my_alien->position.x += step_in_x;
+                my_alien->position.y += step_in_y;
+                }                
             }
         }
                 

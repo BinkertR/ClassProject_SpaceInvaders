@@ -20,8 +20,8 @@
 
 #define BULLET_HEIGHT   5
 #define BULLET_WIDTH    2
-#define BULLET_ACTIVE   1
-#define BULLET_PASSIVE  2
+#define OBJ_ACTIVE      1
+#define OBJ_PASSIVE     0
 #define BULLET_SPEED    5
 
 #define SHIP_HEIGHT     10
@@ -45,6 +45,10 @@
 #define ALIEN_PADDING_Y 10
 #define ALIEN_START_X   50
 #define ALIEN_START_Y   50
+#define ALIEN_MIN_X     20
+#define ALIEN_MAX_X     SCREEN_WIDTH - ALIEN_MIN_X
+#define ALIEN_X_SPEED   1
+#define ALIEN_Y_SPEED   1
 
 typedef struct{
     coord_t position;
@@ -68,7 +72,8 @@ typedef struct {
 
 typedef struct {
     alien_t **first_alien; // pointer to the pointer of the first alien in the column
-    int active_aliens;  // the number of the lowest(on screen) alien in this column (needed to see which alien can shoot).
+    int lowest_active_alien;  // the number of the lowest(on screen) alien in this column (needed to see which alien can shoot).
+    int active;
     SemaphoreHandle_t lock;
 }alien_column_t;
 

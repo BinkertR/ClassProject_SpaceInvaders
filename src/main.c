@@ -79,7 +79,8 @@ int create_tasks() {
 }
 
 int main(int argc, char *argv[])
-{
+{   
+    // TODO Give different task priorities
     if (init_tum_lib(argv) == EXIT_FAILURE) {return EXIT_FAILURE;}
 
     if (create_tasks() == EXIT_FAILURE) {return EXIT_FAILURE;}
