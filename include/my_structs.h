@@ -68,6 +68,7 @@ typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
     alien_t *my_alien;
+    alien_t **alien_column_start;
 } game_objects_t;
 
 game_objects_t *game_objects_init();

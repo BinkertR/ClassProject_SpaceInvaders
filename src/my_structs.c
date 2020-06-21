@@ -31,9 +31,44 @@ alien_t *AlienEasyInt() {
     my_alien->position.y = 50;
     my_alien->alien_score = ALIEN_EASY;
     my_alien->active = BULLET_ACTIVE;  // init to active because it should be display from the beginning
-    my_alien->img_h = AlienGreenLoadImg();
+    my_alien->img_h = AlienLoadImg(ALIEN_EASY);
     my_alien->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return my_alien;
+}
+
+alien_t *AlienInit(int alien_score) {
+    alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
+    my_alien->position.x = 50;
+    my_alien->position.y = 50;
+    my_alien->alien_score = alien_score;
+    my_alien->active = BULLET_ACTIVE;  // init to active because it should be display from the beginning
+    my_alien->img_h = AlienLoadImg(alien_score);
+    my_alien->lock = xSemaphoreCreateMutex(); // Locking mechanism
+    return my_alien;
+}
+
+alien_t **AlienInitColumn() {
+    alien_t *column[ALIENS_PER_COLUMN];
+
+    column[0] = AlienInit(ALIEN_HARD);
+    column[1] = AlienInit(ALIEN_MIDDLE);
+    column[2] = AlienInit(ALIEN_MIDDLE);
+    column[3] = AlienInit(ALIEN_EASY);
+    column[4] = AlienInit(ALIEN_EASY);
+
+    for (int i = 1; i < ALIENS_PER_COLUMN; i++) {
+        column[i]->position.y += 15 * i;
+    }
+    alien_t **alien_column_start = &(column[0]);
+    alien_t **current_alien = alien_column_start;
+
+    for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
+        current_alien = alien_column_start + i;
+        //AlienDrawSingle(current_alien);
+    }
+    current_alien = &(column[0]);
+    return current_alien;
+
 }
 
 alien_t *AlienInitRow() {
@@ -49,7 +84,8 @@ game_objects_t *game_objects_init() {
     game_objects_t *game_objects = pvPortMalloc(sizeof(game_objects_t));
     game_objects->my_spaceship = SpaceShipInit();
     game_objects->my_bullet = BulletInit(); 
-    game_objects->my_alien = AlienEasyInt();   
-
+    game_objects->my_alien = AlienInit(ALIEN_EASY);   
+    //alien_t *column = AlienInitColumn();
+    game_objects->alien_column_start = AlienInitColumn();
     return game_objects;
 }
