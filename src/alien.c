@@ -11,24 +11,44 @@
 TaskHandle_t AlienCalcSingleTask = NULL;
 TaskHandle_t AlienCalcMatrixTask = NULL;
 
-image_handle_t AlienLoadImg(int alien_score) {
-    image_handle_t alien_img;
+image_handle_t alien_low_img_handle = NULL;
+image_handle_t alien_medium_img_handle = NULL;
+image_handle_t alien_high_img_handle = NULL;
+
+image_handle_t AlienLoadImg(int alien_score) {  // TODO 
+    image_handle_t alien_img;  //TODO store this so the same img doesn't need to be loaded multiple times
     int img_width = 0;
     float scale_factor = 1.0;
     if (alien_score == ALIEN_EASY) {
-        alien_img = tumDrawLoadImage(ALIEN_EASY_IMG);
+        if (alien_low_img_handle == NULL) {
+            alien_low_img_handle = tumDrawLoadImage(ALIEN_EASY_IMG);  
+            img_width = tumDrawGetLoadedImageWidth(alien_low_img_handle);
+            scale_factor = ALIEN_WIDTH * 1.0 / img_width;
+            tumDrawSetLoadedImageScale(alien_low_img_handle, scale_factor);  
+        }
+        alien_img = alien_low_img_handle;
     } else if (alien_score == ALIEN_MIDDLE) {
-        alien_img = tumDrawLoadImage(ALIEN_MIDDLE_IMG);
+        if (alien_medium_img_handle == NULL) {
+            alien_medium_img_handle = tumDrawLoadImage(ALIEN_MIDDLE_IMG);
+            img_width = tumDrawGetLoadedImageWidth(alien_medium_img_handle);
+            scale_factor = ALIEN_WIDTH * 1.0 / img_width;
+            tumDrawSetLoadedImageScale(alien_medium_img_handle, scale_factor);  
+        }
+        alien_img = alien_medium_img_handle;
     } else {
-        alien_img = tumDrawLoadImage(ALIEN_HARD_IMG);
+        if (alien_high_img_handle == NULL) {
+            alien_high_img_handle = tumDrawLoadImage(ALIEN_HARD_IMG);
+            img_width = tumDrawGetLoadedImageWidth(alien_high_img_handle);
+            scale_factor = ALIEN_WIDTH * 1.0 / img_width;
+            tumDrawSetLoadedImageScale(alien_high_img_handle, scale_factor);  
+        }
+        alien_img = alien_high_img_handle;
     }
     if (alien_img == NULL) {
         printf("Failed to load alien img");
         return NULL;
     }
-    img_width = tumDrawGetLoadedImageWidth(alien_img);
-    scale_factor = ALIEN_WIDTH * 1.0 / img_width;
-    tumDrawSetLoadedImageScale(alien_img, scale_factor);
+    
     return alien_img;
 }
 
