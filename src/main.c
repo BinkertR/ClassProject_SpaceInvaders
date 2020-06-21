@@ -71,7 +71,8 @@ int create_tasks() {
 
     BulletInitCalcTask(game_objects);
 
-    AlienInitCalcSingleTask(game_objects);
+    //AlienInitCalcSingleTask(game_objects);
+    AlienInitCalcMatrixTask(game_objects);
 
     return EXIT_SUCCESS;
 

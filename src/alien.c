@@ -9,6 +9,7 @@
 #define ALIEN_HARD_IMG "../img/alien_pink.png"
 
 TaskHandle_t AlienCalcSingleTask = NULL;
+TaskHandle_t AlienCalcMatrixTask = NULL;
 
 image_handle_t AlienLoadImg(int alien_score) {
     image_handle_t alien_img;
@@ -66,6 +67,8 @@ int AlienDrawMatrix(alien_t ***alien_matrix_start) {
     return 0;
 }
 
+
+
 int check_hit(alien_t *my_alien, bullet_t *my_bullet) {
     int hit = 0;
     if (my_alien->position.x - ALIEN_WIDTH / 2 < my_bullet->position.x + BULLET_SPEED && my_bullet->position.x - BULLET_WIDTH < my_alien->position.x + ALIEN_WIDTH / 2 ) {
@@ -76,11 +79,10 @@ int check_hit(alien_t *my_alien, bullet_t *my_bullet) {
     return hit;
 }
 
-
 void vAlienCalcSingleTask(game_objects_t *my_gameobjects){
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
-    my_alien = my_gameobjects->my_alien;
+    //my_alien = my_gameobjects->my_alien;
     my_bullet = my_gameobjects->my_bullet;
 
 
@@ -107,11 +109,68 @@ void vAlienCalcSingleTask(game_objects_t *my_gameobjects){
 }
 
 int AlienInitCalcSingleTask(game_objects_t *my_game_objects) {
+    // for testing: 
+    //vAlienCalcMatrixTask(my_game_objects);
+
     if (xTaskCreate(vAlienCalcSingleTask, "AlienCalcSingleTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &AlienCalcSingleTask) != pdPASS) {
-        printf("Failed to create Tast MangaeButtonInit");
+        printf("Failed to create Task AleinCalcSingleTask");
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
 
+int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
+    if (xSemaphoreTake(my_alien->lock, 0) == pdTRUE) {
+            if (my_alien->active == BULLET_ACTIVE) {
+                if (xSemaphoreTake(my_bullet->lock, 0) == pdTRUE) {
+                    if (my_bullet->active == BULLET_ACTIVE) {
+                        //if the bullet hits the alien
+                        if (check_hit(my_alien, my_bullet) == 1) {
+                            my_alien->active = BULLET_PASSIVE;
+                            my_bullet->active = BULLET_PASSIVE;
+                        } 
+                    }                    
+                    xSemaphoreGive(my_bullet->lock);
+                }                
+            }
+            xSemaphoreGive(my_alien->lock);
+        }
+}
+
+void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
+    alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
+    alien_t ***current_row = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_ROW);
+    alien_t **current_column = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_COLUMN);
+    bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
+    //my_alien = my_gameobjects->my_alien;
+    my_bullet = my_gameobjects->my_bullet;
+    int matrix_size_x = ALIENS_PER_ROW, matrix_size_y = ALIENS_PER_COLUMN;
+
+
+    while (1) {
+        for (int i = 0; i < matrix_size_x; i++) {  // iterate through rows
+            current_row = my_gameobjects->alien_matrix + i;
+            for (int k = 0; k < matrix_size_y; k++) { // iterate through columns
+                current_column = *current_row + k;
+                AlienCheckBullet(*current_column, my_bullet);
+            }
+        }
+        
+        //AlienCheckBullet(my_alien, my_bullet);
+        
+        vTaskDelay((TickType_t) (SCREEN_FREQUENCY));
+    }
+}
+
+int AlienInitCalcMatrixTask(game_objects_t *my_game_objects) {
+    // for testing: 
+    //vAlienCalcMatrixTask(my_game_objects);
+
+    if (xTaskCreate(vAlienCalcMatrixTask, "AlienCalcMatrixTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
+                    mainGENERIC_PRIORITY, &AlienCalcMatrixTask) != pdPASS) {
+        printf("Failed to create Task AlienCalcMatrixTask");
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}

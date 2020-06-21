@@ -69,9 +69,9 @@ alien_t *AlienEasyInt();
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
-    alien_t *my_alien;              //just for testing
-    alien_t **alien_column_start;  //just for testing
-    alien_t ***alien_matrix;
+    //alien_t *my_alien;              //just for testing
+    //alien_t **alien_column_start;  //just for testing
+    alien_t ***alien_matrix;  //todo are semaphores needed for this? Maybe no because it only gets read
 } game_objects_t;
 
 game_objects_t *game_objects_init();

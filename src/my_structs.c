@@ -25,7 +25,7 @@ spaceship_t *SpaceShipInit() {
     return my_spaceship;
 }
 
-alien_t *AlienEasyInt() {
+/*alien_t *AlienEasyInt() {
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     my_alien->position.x = 50;
     my_alien->position.y = 50;
@@ -35,7 +35,7 @@ alien_t *AlienEasyInt() {
     my_alien->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return my_alien;
 }
-
+*/
 alien_t *AlienInit(int alien_score) {
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     my_alien->position.x = ALIEN_START_X;
@@ -77,7 +77,7 @@ game_objects_t *game_objects_init() {
     game_objects_t *game_objects = pvPortMalloc(sizeof(game_objects_t));
     game_objects->my_spaceship = SpaceShipInit();
     game_objects->my_bullet = BulletInit(); 
-    game_objects->my_alien = AlienInit(ALIEN_EASY);   
+    //game_objects->my_alien = AlienInit(ALIEN_EASY);   
     //alien_t *column = AlienInitColumn();
     //game_objects->alien_column_start = AlienInitColumn();
     game_objects->alien_matrix = AlienInitMatrix();
