@@ -25,17 +25,6 @@ spaceship_t *SpaceShipInit() {
     return my_spaceship;
 }
 
-/*alien_t *AlienEasyInt() {
-    alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
-    my_alien->position.x = 50;
-    my_alien->position.y = 50;
-    my_alien->alien_score = ALIEN_EASY;
-    my_alien->active = BULLET_ACTIVE;  // init to active because it should be display from the beginning
-    my_alien->img_h = AlienLoadImg(ALIEN_EASY);
-    my_alien->lock = xSemaphoreCreateMutex(); // Locking mechanism
-    return my_alien;
-}
-*/
 alien_t *AlienInit(int alien_score) {
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     my_alien->position.x = ALIEN_START_X;
@@ -59,7 +48,7 @@ alien_t **AlienInitColumn(int x_position) {
 
     for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
         column[i]->position.x = x_position;
-        column[i]->position.y += (ALIEN_WIDTH + 10) * i;
+        column[i]->position.y += (ALIEN_WIDTH + ALIEN_PADDING_Y) * i;
     }
     return column;
 
@@ -68,7 +57,7 @@ alien_t **AlienInitColumn(int x_position) {
 alien_t ***AlienInitMatrix() {
     alien_t ***row = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_ROW);
     for (int i = 0; i < ALIENS_PER_ROW; i++) {  //sizeof(row) / sizeof(alien_t)
-        row[i] = AlienInitColumn(ALIEN_START_Y + (ALIEN_WIDTH + 10) * i);
+        row[i] = AlienInitColumn(ALIEN_START_Y + (ALIEN_WIDTH + ALIEN_PADDING_X) * i);
     }
     return row;
 }

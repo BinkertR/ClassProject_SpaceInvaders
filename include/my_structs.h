@@ -41,6 +41,8 @@
 #define ALIENS_PER_ROW  8
 #define ALIENS_PER_COLUMN   5
 #define ALIEN_WIDTH     40
+#define ALIEN_PADDING_X 25
+#define ALIEN_PADDING_Y 10
 #define ALIEN_START_X   50
 #define ALIEN_START_Y   50
 
@@ -69,8 +71,6 @@ alien_t *AlienEasyInt();
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
-    //alien_t *my_alien;              //just for testing
-    //alien_t **alien_column_start;  //just for testing
     alien_t ***alien_matrix;  //todo are semaphores needed for this? Maybe no because it only gets read
 } game_objects_t;
 
