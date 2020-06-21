@@ -67,23 +67,20 @@ int AlienDrawSingle(alien_t *my_alien) {
     return 0;
 }
 
-int AlienDrawColumn(alien_t **alien_column_start) {
-    alien_t **current_alien = alien_column_start;
-
-    for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
-        current_alien = alien_column_start + i;
-        AlienDrawSingle(*current_alien);
+int AlienDrawMatrix(game_objects_t *my_gameobjects) {  
+    alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
+    
+    int matrix_size_x = ALIENS_PER_ROW, matrix_size_y = ALIENS_PER_COLUMN;
+    
+    for (int i = 0; i < matrix_size_x; i++) {  // iterate through rows
+        //current_row = &(my_gameobjects->alien_matrix[i]);
+        for (int k = 0; k < matrix_size_y; k++) { // iterate through columns
+            my_alien = my_gameobjects->alien_matrix->first_column[i]->first_alien[k];
+            //current_column = *current_row->first_column + k;
+            AlienDrawSingle(my_alien);
+        }
     }
-    return 0;
-}
 
-int AlienDrawMatrix(alien_t ***alien_matrix_start) {
-    alien_t ***current_row = alien_matrix_start;
-
-    for (int i = 0; i < ALIENS_PER_ROW; i++) {
-        current_row = alien_matrix_start + i;
-        AlienDrawColumn(*current_row);
-    }
     return 0;
 }
 
@@ -114,23 +111,28 @@ int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
             }
             xSemaphoreGive(my_alien->lock);
         }
+    return 0;
 }
 
 void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
-    alien_t ***current_row = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_ROW);
-    alien_t **current_column = pvPortMalloc(sizeof(alien_t) * ALIENS_PER_COLUMN);
+    alien_row_t *current_row = pvPortMalloc(sizeof(alien_row_t));
+    alien_column_t *current_column = pvPortMalloc(sizeof(alien_column_t));
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
     
     my_bullet = my_gameobjects->my_bullet;
     int matrix_size_x = ALIENS_PER_ROW, matrix_size_y = ALIENS_PER_COLUMN;
 
+    current_row = my_gameobjects->alien_matrix;
+
     while (1) {
         for (int i = 0; i < matrix_size_x; i++) {  // iterate through rows
-            current_row = my_gameobjects->alien_matrix + i;
+            //current_row = &(my_gameobjects->alien_matrix[i]);
+            current_column = my_gameobjects->alien_matrix->first_column[i];
             for (int k = 0; k < matrix_size_y; k++) { // iterate through columns
-                current_column = *current_row + k;
-                AlienCheckBullet(*current_column, my_bullet);
+                my_alien = my_gameobjects->alien_matrix->first_column[i]->first_alien[k];
+                //current_column = *current_row->first_column + k;
+                AlienCheckBullet(my_alien, my_bullet);
             }
         }
                 

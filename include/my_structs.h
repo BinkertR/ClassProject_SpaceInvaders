@@ -66,12 +66,24 @@ typedef struct {
     SemaphoreHandle_t lock;   
 }alien_t;
 
-alien_t *AlienEasyInt();
+typedef struct {
+    alien_t **first_alien; // pointer to the pointer of the first alien in the column
+    int active_aliens;  // the number of the lowest(on screen) alien in this column (needed to see which alien can shoot).
+    SemaphoreHandle_t lock;
+}alien_column_t;
+
+typedef struct{
+    alien_column_t **first_column;  
+    int leftest_active_column;  // the number of the most left column (needed to move the aliens always right to the side)
+    int rightest_active_column;  // the number of the most right column (needed to move the aliens always right to the side)
+}alien_row_t;
+
+
 
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
-    alien_t ***alien_matrix;  //todo are semaphores needed for this? Maybe no because it only gets read
+    alien_row_t *alien_matrix;  //first_row->first_column = first_alien; starting at top left of screen
 } game_objects_t;
 
 game_objects_t *game_objects_init();
