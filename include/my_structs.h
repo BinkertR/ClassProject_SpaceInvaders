@@ -22,7 +22,7 @@
 #define BULLET_WIDTH    2
 #define OBJ_ACTIVE      1
 #define OBJ_PASSIVE     0
-#define BULLET_SPEED    10
+#define BULLET_SPEED    7
 
 #define SHIP_HEIGHT     10
 #define SHIP_WIDTH      50
@@ -33,7 +33,7 @@
 #define SHIP_X_MIN      PADDING + SHIP_WIDTH / 2
 #define SHIP_Y_CO       SCREEN_HEIGHT - PADDING - SHIP_HEIGHT
 
-#define PLAYER_LIFES    2
+#define PLAYER_LIFES    2  // Player lifes besides the first one
 #define LEVEL_SPEED_INCREASE_FAKTOR     2
 
 #define ALIEN_EASY      10
@@ -52,6 +52,10 @@
 #define ALIEN_ACCELERATION      0.05
 #define ALIEN_Y_SPEED   5
 
+#define MAX_ACTIVE_ALIEN_BULLETS    10
+#define ALIEN_BULLET_SPEED  3
+#define RAND_SHOOT_CHANCE   1000  // 1 in RANDOM_SHOOT_CHANCE
+
 typedef struct{
     coord_t position;
     int active;
@@ -59,7 +63,13 @@ typedef struct{
 }bullet_t;
 
 typedef struct{
-    int x_position;
+    bullet_t **first_bullet;
+    SemaphoreHandle_t lock;
+}alien_bullet_t;
+
+
+typedef struct{
+    coord_t position;
     int lifes;
     SemaphoreHandle_t lock;
 }spaceship_t;
@@ -97,6 +107,7 @@ typedef struct{
     int current_score;
     int highscore;
     int level;
+    int lifes_left;
     SemaphoreHandle_t lock;
 }score_t;
 
@@ -104,6 +115,7 @@ typedef struct{
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
+    bullet_t **alien_bullets;
     alien_matrix_t *alien_matrix;  //first_row->first_column = first_alien; starting at top left of screen
     score_t *score;
     SemaphoreHandle_t lock;

@@ -17,11 +17,11 @@ int SpaceShipDraw(spaceship_t *my_spaceship) {
 
     if (xSemaphoreTake((*my_spaceship).lock, 0) == pdTRUE) {
 
-        gun_draw_position.y = SHIP_Y_CO - GUN_HEIGHT;
-        gun_draw_position.x = (*my_spaceship).x_position - GUN_WIDHT / 2 ;
+        gun_draw_position.y = my_spaceship->position.y - GUN_HEIGHT;
+        gun_draw_position.x = my_spaceship->position.x - GUN_WIDHT / 2 ;
 
-        ship_draw_positoin.y = SHIP_Y_CO;
-        ship_draw_positoin.x = (*my_spaceship).x_position - SHIP_WIDTH / 2;
+        ship_draw_positoin.y = my_spaceship->position.y;
+        ship_draw_positoin.x = my_spaceship->position.x - SHIP_WIDTH / 2;
 
         xSemaphoreGive((*my_spaceship).lock);
 
@@ -36,11 +36,11 @@ int SpaceShipDraw(spaceship_t *my_spaceship) {
 
 int SpaceShipMoveLeft(spaceship_t *my_spaceship) {
     if (xSemaphoreTake((*my_spaceship).lock, 0) == pdTRUE) {
-        (*my_spaceship).x_position -= SHIP_SPEED;
-        if ((*my_spaceship).x_position < SHIP_X_MIN) {
-            (*my_spaceship).x_position = SHIP_X_MIN;
+        my_spaceship->position.x -= SHIP_SPEED;
+        if (my_spaceship->position.x < SHIP_X_MIN) {
+            my_spaceship->position.x = SHIP_X_MIN;
         }
-        xSemaphoreGive((*my_spaceship).lock);
+        xSemaphoreGive(my_spaceship->lock);
         return 0;
     }
     return -1;
@@ -48,11 +48,11 @@ int SpaceShipMoveLeft(spaceship_t *my_spaceship) {
 
 int SpaceShipMoveRight(spaceship_t *my_spaceship) {
     if (xSemaphoreTake((*my_spaceship).lock, 0) == pdTRUE) {
-        (*my_spaceship).x_position += SHIP_SPEED;
-        if ((*my_spaceship).x_position > SHIP_X_MAX) {
-            (*my_spaceship).x_position = SHIP_X_MAX;
+        my_spaceship->position.x += SHIP_SPEED;
+        if (my_spaceship->position.x > SHIP_X_MAX) {
+            my_spaceship->position.x = SHIP_X_MAX;
         }
-        xSemaphoreGive((*my_spaceship).lock);
+        xSemaphoreGive(my_spaceship->lock);
         return 0;
     }
     return -1;

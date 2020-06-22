@@ -14,11 +14,20 @@ bullet_t *BulletInit() {
     return my_bullet;
 }
 
+bullet_t **AlienBulletInit() {
+    bullet_t **first_bullet = pvPortMalloc(sizeof(bullet_t) * MAX_ACTIVE_ALIEN_BULLETS);
+    for (int i = 0; i < MAX_ACTIVE_ALIEN_BULLETS; i++) {
+        first_bullet[i] = BulletInit();
+    }
+    return first_bullet;
+}
+
 spaceship_t *SpaceShipInit() {
     spaceship_t *my_spaceship = pvPortMalloc(sizeof(spaceship_t));
     int x = 0;
     x = SCREEN_WIDTH / 2 - SHIP_WIDTH / 2;
-    my_spaceship->x_position = x;
+    my_spaceship->position.x = x;
+    my_spaceship->position.y = SHIP_Y_CO;
     my_spaceship->lifes = PLAYER_LIFES;
     my_spaceship->lock = xSemaphoreCreateMutex(); // Locking mechanism
 
@@ -86,6 +95,7 @@ score_t *ScoreInit() {
     score->current_score = 0;
     score->highscore = 0;
     score->level = 1;
+    score->lifes_left = PLAYER_LIFES;
     score->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return score;
 }
@@ -94,6 +104,7 @@ game_objects_t *game_objects_init() {
     game_objects_t *game_objects = pvPortMalloc(sizeof(game_objects_t));
     game_objects->my_spaceship = SpaceShipInit();
     game_objects->my_bullet = BulletInit(); 
+    game_objects->alien_bullets = AlienBulletInit();
     game_objects->alien_matrix = AlienInitMatrix();
     game_objects->score = ScoreInit();
     game_objects->lock = xSemaphoreCreateMutex();

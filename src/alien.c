@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "TUM_Draw.h"
 
@@ -171,11 +172,11 @@ int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_spee
                         }                  
                                     
                     }
-                        if (current_column->lowest_active_alien == -1) {
-                            // if all the aliens in this column is not active anymore set the column to passive
-                            current_column->active = OBJ_PASSIVE;
-                            my_gameobjects->alien_matrix->active_columns[i] = OBJ_PASSIVE;
-                        }
+                    if (current_column->lowest_active_alien == -1) {
+                        // if all the aliens in this column is not active anymore set the column to passive
+                        current_column->active = OBJ_PASSIVE;
+                        my_gameobjects->alien_matrix->active_columns[i] = OBJ_PASSIVE;
+                    }   
                 }
 
                 xSemaphoreGive(current_column->lock);
@@ -186,6 +187,51 @@ int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_spee
     }
     
     return 0; 
+}
+
+int GetRandInt() {
+    // get a random number between 0 and 1000
+    int random_int;
+
+    random_int = (rand() % (RAND_SHOOT_CHANCE - 0 + 1)) + 0;
+
+    return random_int;
+}
+
+int AlienShootBullet(game_objects_t *gameobjects) {
+    // iterate through all active columns and give the lowest alien a chance to shoot a bullet
+    alien_column_t *current_column; // = pvPortMalloc(sizeof(alien_column_t));
+    bullet_t *current_bullet; // = pvPortMalloc(sizeof(bullet_t));
+
+    int r = 0, lowest_active_alien = 0;
+
+    for (int i = 0; i < ALIENS_PER_ROW; i++) {
+        current_column = gameobjects->alien_matrix->first_column[i];
+        if (xSemaphoreTake(current_column->lock, 0) == pdTRUE) {
+            if (current_column->active == OBJ_ACTIVE) {
+                r = GetRandInt();
+                if (r <= 1) {
+                    lowest_active_alien = current_column->lowest_active_alien;
+                    for ( int k = 0; k < MAX_ACTIVE_ALIEN_BULLETS; k++) {  // get the first free alien bullet slot
+                        current_bullet = gameobjects->alien_bullets[k];
+                        if (xSemaphoreTake(current_bullet->lock, 0) == pdTRUE) {
+                            if (current_bullet->active == OBJ_PASSIVE) {
+                                current_bullet->position.x = current_column->first_alien[lowest_active_alien]->position.x;
+                                current_bullet->position.y = current_column->first_alien[lowest_active_alien]->position.y;
+                                current_bullet->active = OBJ_ACTIVE;
+                                xSemaphoreGive(current_bullet->lock);
+                                break;  // if one free bullet slot was found and the bullet was shot. End the search for the free bullet slot
+                            }
+                            xSemaphoreGive(current_bullet->lock);
+                        }
+                    }
+                }
+            }
+            xSemaphoreGive(current_column->lock);
+        }  
+    }
+    return 0;
+    
 }
 
 void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
@@ -262,6 +308,8 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
             my_gameobjects->alien_matrix->rightest_active_column = rightest_active_column_int;
             leftest_active_column = my_gameobjects->alien_matrix->first_column[leftest_active_column_int];
             rightest_active_column = my_gameobjects->alien_matrix->first_column[rightest_active_column_int];
+
+            AlienShootBullet(my_gameobjects);
         }
                 
         vTaskDelay((TickType_t) (SCREEN_FREQUENCY));
