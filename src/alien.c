@@ -163,8 +163,13 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
                     if (my_alien->active == OBJ_ACTIVE) {
                         if (AlienCheckBullet(my_alien, my_bullet) == 1) {
                             // if the alien got hit
+                            //increase the speed
                             current_alien_speed += ALIEN_ACCELERATION;
-
+                            // increase the score
+                            if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
+                                my_gameobjects->score->score += my_alien->alien_score;
+                                xSemaphoreGive(my_gameobjects->score->lock);
+                            }
                         } else {
                             // update the lowest active alien value of the column to this alien
                             current_column->lowest_active_alien = k;

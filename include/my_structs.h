@@ -91,12 +91,17 @@ typedef struct{
     int rightest_active_column;  // the number of the most right column (needed to move the aliens always right to the side)
 }alien_row_t;
 
+typedef struct{
+    int score;
+    SemaphoreHandle_t lock;
+}score_t;
 
 
 typedef struct {
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
     alien_row_t *alien_matrix;  //first_row->first_column = first_alien; starting at top left of screen
+    score_t *score;
 } game_objects_t;
 
 game_objects_t *game_objects_init();

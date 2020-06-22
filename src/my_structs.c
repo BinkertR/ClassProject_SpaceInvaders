@@ -79,10 +79,18 @@ alien_row_t *AlienInitMatrix() {
     return row;
 }
 
+score_t *ScoreInit() {
+    score_t *score = pvPortMalloc(sizeof(score_t));
+    score->score = 0;
+    score->lock = xSemaphoreCreateMutex(); // Locking mechanism
+    return score;
+}
+
 game_objects_t *game_objects_init() {
     game_objects_t *game_objects = pvPortMalloc(sizeof(game_objects_t));
     game_objects->my_spaceship = SpaceShipInit();
     game_objects->my_bullet = BulletInit(); 
     game_objects->alien_matrix = AlienInitMatrix();
+    game_objects->score = ScoreInit();
     return game_objects;
 }

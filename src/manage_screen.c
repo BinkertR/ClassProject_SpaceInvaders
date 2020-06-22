@@ -45,9 +45,15 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
 
         BulletDraw(my_gameobjects->my_bullet);
 
-        //AlienDrawSingle(my_gameobjects->my_alien);
-        //AlienDrawColumn(my_gameobjects->alien_column_start);
         AlienDrawMatrix(my_gameobjects);
+
+        //draw score
+        if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
+            char score_text[50]; 
+            sprintf(score_text, "Score: %d", my_gameobjects->score->score);
+            tumDrawText(&score_text, 0, 0, White);
+            xSemaphoreGive(my_gameobjects->score->lock);
+        }
 
         tumDrawUpdateScreen();
     }
