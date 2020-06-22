@@ -50,7 +50,8 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
         //draw score
         if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
             char score_text[50]; 
-            sprintf(score_text, "Score: %d", my_gameobjects->score->score);
+            sprintf(score_text, "Score: %d   |   Highscore: %d   |   Level: %d     ", 
+                my_gameobjects->score->current_score, my_gameobjects->score->highscore, my_gameobjects->score->level);
             tumDrawText(&score_text, 0, 0, White);
             xSemaphoreGive(my_gameobjects->score->lock);
         }

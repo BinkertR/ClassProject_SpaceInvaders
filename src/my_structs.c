@@ -83,7 +83,9 @@ alien_matrix_t *AlienInitMatrix() {
 
 score_t *ScoreInit() {
     score_t *score = pvPortMalloc(sizeof(score_t));
-    score->score = 0;
+    score->current_score = 0;
+    score->highscore = 0;
+    score->level = 1;
     score->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return score;
 }
@@ -94,5 +96,6 @@ game_objects_t *game_objects_init() {
     game_objects->my_bullet = BulletInit(); 
     game_objects->alien_matrix = AlienInitMatrix();
     game_objects->score = ScoreInit();
+    game_objects->lock = xSemaphoreCreateMutex();
     return game_objects;
 }

@@ -148,13 +148,13 @@ int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_spee
                             // if the alien is active, calculate, if it gets hit by the bullet
                             if (current_alien->active == OBJ_ACTIVE) {
                                 // if alien got hit: update speed and score, else: update position and lowest_active_alien
-                                if (AlienCheckBullet(current_alien, my_gameobjects->my_bullet) == 1) {
+                                if (AlienCheckBullet(current_alien, my_gameobjects->my_bullet) == 1) {  // for this the alien_lock needs to be taken
                                     // if the alien got hit
                                     //increase the speed
                                     *(current_alien_speed) += ALIEN_ACCELERATION;
                                     // increase the score
                                     if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
-                                        my_gameobjects->score->score += current_alien->alien_score;
+                                        my_gameobjects->score->current_score += current_alien->alien_score;
                                         xSemaphoreGive(my_gameobjects->score->lock);
                                     }
                                 } else {
@@ -218,47 +218,14 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
             step_in_y = ALIEN_Y_SPEED;
         } else {  // continue moving aliens in the same direction, but stop going down
             step_in_y = 0;
+            if (step_in_x < 0) {
+                step_in_x = - current_alien_speed;
+            } else {
+                step_in_x = + current_alien_speed;
+            }
         }
 
         AlienIterateMatrix(my_gameobjects, &current_alien_speed, step_in_x, step_in_y);
-
-        // check for each alien, if it got hit by the bullet
-        /*for (int i = alien_matrix->leftest_active_column; i <= alien_matrix->rightest_active_column; i++) {  // iterate through rows
-            current_column = my_gameobjects->alien_matrix->first_column[i];
-            if (current_column->active == OBJ_ACTIVE) {
-                current_column->lowest_active_alien = -1;
-                for (int k = 0; k < ALIENS_PER_COLUMN; k++) { // iterate through columns
-                    my_alien = my_gameobjects->alien_matrix->first_column[i]->first_alien[k];
-
-                    // if the alien is active, calculate, if it gets hit by the bullet
-                    if (my_alien->active == OBJ_ACTIVE) {
-                        if (AlienCheckBullet(my_alien, my_bullet) == 1) {
-                            // if the alien got hit
-                            //increase the speed
-                            current_alien_speed += ALIEN_ACCELERATION;
-                            // increase the score
-                            if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
-                                my_gameobjects->score->score += my_alien->alien_score;
-                                xSemaphoreGive(my_gameobjects->score->lock);
-                            }
-                        } else {
-                            // update the lowest active alien value of the column to this alien
-                            current_column->lowest_active_alien = k;
-                        
-                            // move alien according to the previously calculated steps
-                            my_alien->position.x += step_in_x;
-                            my_alien->position.y += step_in_y;
-                        }
-                    }                
-                }
-                if (current_column->lowest_active_alien == -1) {
-                    // if all the aliens in this column is not active anymore set the column to passive
-                    current_column->active = OBJ_PASSIVE;
-                    my_gameobjects->alien_matrix->active_columns[i] = OBJ_PASSIVE;
-                }
-            }
-        }
-        */
 
         //update leftest and rightes active column
         leftest_active_column_int = ALIENS_PER_ROW - 1; 
@@ -276,7 +243,20 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
         }
         if (leftest_active_column_int == ALIENS_PER_ROW - 1 && rightest_active_column_int == 0) {
             // player killed all aliens in this stage
+            // reload aliens for next level
             printf("You won this level");
+            if (xSemaphoreTake(my_gameobjects->lock, 0) == pdTRUE) {
+                my_gameobjects->alien_matrix = AlienInitMatrix();
+                xSemaphoreGive(my_gameobjects->lock);
+            }
+            if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
+                my_gameobjects->score->level += 1;
+                current_alien_speed = ALIEN_X_SPEED * my_gameobjects->score->level * LEVEL_SPEED_INCREASE_FAKTOR;
+                xSemaphoreGive(my_gameobjects->score->lock);
+            }
+            alien_matrix = my_gameobjects->alien_matrix;
+            leftest_active_column = my_gameobjects->alien_matrix->first_column[leftest_active_column_int];
+            rightest_active_column = my_gameobjects->alien_matrix->first_column[rightest_active_column_int];
         } else {
             my_gameobjects->alien_matrix->leftest_active_column = leftest_active_column_int;
             my_gameobjects->alien_matrix->rightest_active_column = rightest_active_column_int;
