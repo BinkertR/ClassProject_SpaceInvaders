@@ -47,8 +47,8 @@
 #define ALIEN_START_Y   50
 #define ALIEN_MIN_X     20
 #define ALIEN_MAX_X     SCREEN_WIDTH - ALIEN_MIN_X
-#define ALIEN_X_SPEED   1
-#define ALIEN_ACCELERATION      0.2
+#define ALIEN_X_SPEED   0.1
+#define ALIEN_ACCELERATION      0.1
 #define ALIEN_Y_SPEED   3
 
 typedef struct{
@@ -64,7 +64,12 @@ typedef struct{
 }spaceship_t;
 
 typedef struct {
-    coord_t position;
+    float x;
+    float y;
+}coord_float_t;
+
+typedef struct {
+    coord_float_t position;  // using float to also keep track of position changes smaller then one pixel -> move every n screen ticks
     int alien_score;
     int active;
     image_handle_t img_h;

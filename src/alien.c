@@ -125,7 +125,8 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     alien_column_t *current_column = pvPortMalloc(sizeof(alien_column_t));
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
 
-    int step_in_x = ALIEN_X_SPEED, step_in_y = 0, current_min_x = NULL, current_max_x = NULL;  // how fare the aliens should step into each direction
+    int current_min_x = NULL, current_max_x = NULL;  // how fare the aliens should step into each direction
+    float step_in_x = ALIEN_X_SPEED, step_in_y = ALIEN_Y_SPEED;
     float current_alien_speed = ALIEN_X_SPEED;
 
     my_bullet = my_gameobjects->my_bullet;
@@ -135,10 +136,10 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
         //set the moving steps, so that they can be applied to each alien during the bullet iteration
         current_min_x = my_gameobjects->alien_matrix->first_column[current_row->leftest_active_column]->first_alien[0]->position.x;
         current_max_x = my_gameobjects->alien_matrix->first_column[current_row->rightest_active_column]->first_alien[0]->position.x;
-        if (current_min_x - ALIEN_WIDTH / 2 < ALIEN_MIN_X) {  // if the aliens are on the left border change direction
+        if (current_min_x - ALIEN_WIDTH - current_alien_speed / 2 < ALIEN_MIN_X) {  // if the aliens are on the left border change direction
             step_in_x = + current_alien_speed;
             step_in_y = 0;
-        } else if (current_max_x + ALIEN_WIDTH / 2 > ALIEN_MAX_X) {  // if the aliens are on the left border change direction and move aliens one down
+        } else if (current_max_x + ALIEN_WIDTH + current_alien_speed / 2 > ALIEN_MAX_X) {  // if the aliens are on the left border change direction and move aliens one down
             step_in_x = - current_alien_speed;
             step_in_y = ALIEN_Y_SPEED;
         } else {  // continue moving aliens in the same direction, but stop going down
