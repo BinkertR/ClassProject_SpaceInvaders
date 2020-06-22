@@ -123,19 +123,24 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     alien_row_t *current_row = pvPortMalloc(sizeof(alien_row_t));
     alien_column_t *current_column = pvPortMalloc(sizeof(alien_column_t));
+    alien_column_t *leftest_active_column = pvPortMalloc(sizeof(alien_column_t));
+    alien_column_t *rightest_active_column = pvPortMalloc(sizeof(alien_column_t));
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
 
-    int current_min_x = NULL, current_max_x = NULL;  // how fare the aliens should step into each direction
+    int current_min_x = NULL, current_max_x = NULL, leftest_active_column_int = 0, rightest_active_column_int = ALIENS_PER_ROW - 1;  // how fare the aliens should step into each direction
     float step_in_x = ALIEN_X_SPEED, step_in_y = ALIEN_Y_SPEED;
     float current_alien_speed = ALIEN_X_SPEED;
 
     my_bullet = my_gameobjects->my_bullet;
     current_row = my_gameobjects->alien_matrix;
+    leftest_active_column = my_gameobjects->alien_matrix->first_column[leftest_active_column_int];
+    rightest_active_column = my_gameobjects->alien_matrix->first_column[rightest_active_column_int];
 
     while (1) {
         //set the moving steps, so that they can be applied to each alien during the bullet iteration
-        current_min_x = my_gameobjects->alien_matrix->first_column[current_row->leftest_active_column]->first_alien[0]->position.x;
-        current_max_x = my_gameobjects->alien_matrix->first_column[current_row->rightest_active_column]->first_alien[0]->position.x;
+        // get the x value of the most left and the most right alien in the hole matrix to see if these aliens would be out of the screen
+        current_min_x = leftest_active_column->first_alien[leftest_active_column->lowest_active_alien]->position.x;
+        current_max_x = rightest_active_column->first_alien[rightest_active_column->lowest_active_alien]->position.x;
         if (current_min_x - ALIEN_WIDTH - current_alien_speed / 2 < ALIEN_MIN_X) {  // if the aliens are on the left border change direction
             step_in_x = + current_alien_speed;
             step_in_y = 0;
@@ -179,24 +184,27 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
         }
 
         //update leftest and rightes active column
-        int leftest_active_column = ALIENS_PER_ROW - 1, rightest_active_column = 0;
+        leftest_active_column_int = ALIENS_PER_ROW - 1; 
+        rightest_active_column_int = 0;
         for (int i = 0; i < ALIENS_PER_ROW; i++) {
             current_column = my_gameobjects->alien_matrix->first_column[i];
             if (current_column->active == OBJ_ACTIVE) {
-                if (i < leftest_active_column) {
-                    leftest_active_column = i;
+                if (i < leftest_active_column_int) {
+                    leftest_active_column_int = i;
                 }
-                if (i > rightest_active_column) {
-                    rightest_active_column = i;
+                if (i > rightest_active_column_int) {
+                    rightest_active_column_int = i;
                 }
             }
         }
-        if (leftest_active_column == ALIENS_PER_ROW - 1 && rightest_active_column == 0) {
+        if (leftest_active_column_int == ALIENS_PER_ROW - 1 && rightest_active_column_int == 0) {
             // player killed all aliens in this stage
             printf("You won this level");
         } else {
-            my_gameobjects->alien_matrix->leftest_active_column = leftest_active_column;
-            my_gameobjects->alien_matrix->rightest_active_column = rightest_active_column;
+            my_gameobjects->alien_matrix->leftest_active_column = leftest_active_column_int;
+            my_gameobjects->alien_matrix->rightest_active_column = rightest_active_column_int;
+            leftest_active_column = my_gameobjects->alien_matrix->first_column[leftest_active_column_int];
+            rightest_active_column = my_gameobjects->alien_matrix->first_column[rightest_active_column_int];
         }
                 
         vTaskDelay((TickType_t) (SCREEN_FREQUENCY));
