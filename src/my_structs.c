@@ -47,13 +47,16 @@ alien_column_t *AlienInitColumn(int x_position) {
     column->first_alien[3] = AlienInit(ALIEN_EASY);
     column->first_alien[4] = AlienInit(ALIEN_EASY);
 
+    int *active_aliens = pvPortMalloc(sizeof(int) * ALIENS_PER_COLUMN);
     column->lowest_active_alien = ALIENS_PER_COLUMN - 1;
     column->active = OBJ_ACTIVE;
-
+    
     for (int i = 0; i < ALIENS_PER_COLUMN; i++) {
         column->first_alien[i]->position.x = x_position;
         column->first_alien[i]->position.y += (ALIEN_WIDTH + ALIEN_PADDING_Y) * i;
+        active_aliens[i] = OBJ_ACTIVE;
     }
+    column->active_aliens = &(active_aliens[0]);
     return column;
 
 }
@@ -66,6 +69,11 @@ alien_row_t *AlienInitMatrix() {
         x_position = ALIEN_START_Y + (ALIEN_WIDTH + ALIEN_PADDING_X) * i;
         row->first_column[i] = AlienInitColumn(x_position);
     }
+    int *active_colums = pvPortMalloc(sizeof(int) * ALIENS_PER_ROW);
+    for (int i = 0; i < ALIENS_PER_ROW; i++) {
+        active_colums[i] = OBJ_ACTIVE;
+    }
+    row->active_columns = &(active_colums[0]);
     row->leftest_active_column = 0;
     row->rightest_active_column = ALIENS_PER_ROW - 1;
     return row;

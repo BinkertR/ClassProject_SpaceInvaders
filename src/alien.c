@@ -142,21 +142,53 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
         // check for each alien, if it got hit by the bullet
         for (int i = current_row->leftest_active_column; i <= current_row->rightest_active_column; i++) {  // iterate through rows
             current_column = my_gameobjects->alien_matrix->first_column[i];
-            for (int k = 0; k < ALIENS_PER_COLUMN; k++) { // iterate through columns
-                my_alien = my_gameobjects->alien_matrix->first_column[i]->first_alien[k];
-                if (my_alien->active == OBJ_ACTIVE) {
-                    AlienCheckBullet(my_alien, my_bullet);
-                if (my_alien->active == OBJ_PASSIVE) {  // if the alien died keep track of it to calc alien_bullets and moving
-                    current_column->lowest_active_alien -= 1;  // should also be k-1
-                    if (current_column->lowest_active_alien == -1) {  //if all aliens in this column died.
-                        // to do 
-                    }
+            if (current_column->active == OBJ_ACTIVE) {
+                current_column->lowest_active_alien = -1;
+                for (int k = 0; k < ALIENS_PER_COLUMN; k++) { // iterate through columns
+                    my_alien = my_gameobjects->alien_matrix->first_column[i]->first_alien[k];
+
+                    // if the alien is active, calculate, if it gets hit by the bullet
+                    if (my_alien->active == OBJ_ACTIVE) {
+                        AlienCheckBullet(my_alien, my_bullet);
+
+                        // if alien is still active after bullet calculation
+                        if (my_alien->active == OBJ_ACTIVE) {
+                            // update the lowest active alien value of the column to this alien
+                            current_column->lowest_active_alien = k;
+                        
+                            // move alien according to the previously calculated steps
+                            my_alien->position.x += step_in_x;
+                            my_alien->position.y += step_in_y;
+                        }
+                    }                
                 }
-                // move alien according to the previously calculated steps
-                my_alien->position.x += step_in_x;
-                my_alien->position.y += step_in_y;
-                }                
+                if (current_column->lowest_active_alien == -1) {
+                    // if all the aliens in this column is not active anymore set the column to passive
+                    current_column->active = OBJ_PASSIVE;
+                    my_gameobjects->alien_matrix->active_columns[i] = OBJ_PASSIVE;
+                }
             }
+        }
+
+        //update leftest and rightes active column
+        int leftest_active_column = ALIENS_PER_ROW - 1, rightest_active_column = 0;
+        for (int i = 0; i < ALIENS_PER_ROW; i++) {
+            current_column = my_gameobjects->alien_matrix->first_column[i];
+            if (current_column->active == OBJ_ACTIVE) {
+                if (i < leftest_active_column) {
+                    leftest_active_column = i;
+                }
+                if (i > rightest_active_column) {
+                    rightest_active_column = i;
+                }
+            }
+        }
+        if (leftest_active_column == ALIENS_PER_ROW - 1 && rightest_active_column == 0) {
+            // player killed all aliens in this stage
+            printf("You won this level");
+        } else {
+            my_gameobjects->alien_matrix->leftest_active_column = leftest_active_column;
+            my_gameobjects->alien_matrix->rightest_active_column = rightest_active_column;
         }
                 
         vTaskDelay((TickType_t) (SCREEN_FREQUENCY));

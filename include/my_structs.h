@@ -73,12 +73,14 @@ typedef struct {
 typedef struct {
     alien_t **first_alien; // pointer to the pointer of the first alien in the column
     int lowest_active_alien;  // the number of the lowest(on screen) alien in this column (needed to see which alien can shoot).
+    int *active_aliens;  //array with an entry for each alien. 1 if alien is active, else 0
     int active;
     SemaphoreHandle_t lock;
 }alien_column_t;
 
 typedef struct{
     alien_column_t **first_column;  
+    int *active_columns;  //array with an entry for each column. 1 if column is active, else 0
     int leftest_active_column;  // the number of the most left column (needed to move the aliens always right to the side)
     int rightest_active_column;  // the number of the most right column (needed to move the aliens always right to the side)
 }alien_row_t;
