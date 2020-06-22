@@ -48,7 +48,8 @@
 #define ALIEN_MIN_X     20
 #define ALIEN_MAX_X     SCREEN_WIDTH - ALIEN_MIN_X
 #define ALIEN_X_SPEED   1
-#define ALIEN_Y_SPEED   1
+#define ALIEN_ACCELERATION      0.2
+#define ALIEN_Y_SPEED   3
 
 typedef struct{
     coord_t position;

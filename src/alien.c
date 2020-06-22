@@ -96,6 +96,10 @@ int check_hit(alien_t *my_alien, bullet_t *my_bullet) {
 }
 
 int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
+    // checks threadsafe if the alien got hit by the bullet
+    // returns 1, if the alien got hit, returns 0 else
+
+    int got_hit = 0;
     if (xSemaphoreTake(my_alien->lock, 0) == pdTRUE) {
             if (my_alien->active == OBJ_ACTIVE) {
                 if (xSemaphoreTake(my_bullet->lock, 0) == pdTRUE) {
@@ -104,6 +108,7 @@ int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
                         if (check_hit(my_alien, my_bullet) == 1) {
                             my_alien->active = OBJ_PASSIVE;
                             my_bullet->active = OBJ_PASSIVE;
+                            got_hit = 1;
                         } 
                     }                    
                     xSemaphoreGive(my_bullet->lock);
@@ -111,7 +116,7 @@ int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
             }
             xSemaphoreGive(my_alien->lock);
         }
-    return 0;
+    return got_hit;
 }
 
 void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
@@ -121,6 +126,7 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
 
     int step_in_x = ALIEN_X_SPEED, step_in_y = 0, current_min_x = NULL, current_max_x = NULL;  // how fare the aliens should step into each direction
+    float current_alien_speed = ALIEN_X_SPEED;
 
     my_bullet = my_gameobjects->my_bullet;
     current_row = my_gameobjects->alien_matrix;
@@ -130,10 +136,10 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
         current_min_x = my_gameobjects->alien_matrix->first_column[current_row->leftest_active_column]->first_alien[0]->position.x;
         current_max_x = my_gameobjects->alien_matrix->first_column[current_row->rightest_active_column]->first_alien[0]->position.x;
         if (current_min_x - ALIEN_WIDTH / 2 < ALIEN_MIN_X) {  // if the aliens are on the left border change direction
-            step_in_x = + ALIEN_X_SPEED;
+            step_in_x = + current_alien_speed;
             step_in_y = 0;
         } else if (current_max_x + ALIEN_WIDTH / 2 > ALIEN_MAX_X) {  // if the aliens are on the left border change direction and move aliens one down
-            step_in_x = - ALIEN_X_SPEED;
+            step_in_x = - current_alien_speed;
             step_in_y = ALIEN_Y_SPEED;
         } else {  // continue moving aliens in the same direction, but stop going down
             step_in_y = 0;
@@ -149,10 +155,11 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
 
                     // if the alien is active, calculate, if it gets hit by the bullet
                     if (my_alien->active == OBJ_ACTIVE) {
-                        AlienCheckBullet(my_alien, my_bullet);
+                        if (AlienCheckBullet(my_alien, my_bullet) == 1) {
+                            // if the alien got hit
+                            current_alien_speed += ALIEN_ACCELERATION;
 
-                        // if alien is still active after bullet calculation
-                        if (my_alien->active == OBJ_ACTIVE) {
+                        } else {
                             // update the lowest active alien value of the column to this alien
                             current_column->lowest_active_alien = k;
                         
