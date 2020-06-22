@@ -57,12 +57,13 @@ alien_column_t *AlienInitColumn(int x_position) {
         active_aliens[i] = OBJ_ACTIVE;
     }
     column->active_aliens = &(active_aliens[0]);
+    column->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return column;
 
 }
 
-alien_row_t *AlienInitMatrix() {
-    alien_row_t *row = pvPortMalloc(sizeof(alien_row_t));
+alien_matrix_t *AlienInitMatrix() {
+    alien_matrix_t *row = pvPortMalloc(sizeof(alien_matrix_t));
     row->first_column = pvPortMalloc(sizeof(alien_column_t) * sizeof(alien_t) * ALIENS_PER_ROW * ALIENS_PER_COLUMN);
     int x_position = 0;
     for (int i = 0; i < ALIENS_PER_ROW; i++) {  //sizeof(row) / sizeof(alien_t)
@@ -76,6 +77,7 @@ alien_row_t *AlienInitMatrix() {
     row->active_columns = &(active_colums[0]);
     row->leftest_active_column = 0;
     row->rightest_active_column = ALIENS_PER_ROW - 1;
+    row->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return row;
 }
 
