@@ -56,6 +56,12 @@
 #define ALIEN_BULLET_SPEED  3
 #define RAND_SHOOT_CHANCE   1000  // 1 in RANDOM_SHOOT_CHANCE
 
+#define NUMBER_OF_BUNKERS   5
+#define BUNKER_CELL_SIZE    7
+#define BUNKER_X_CELLS_NUMBER 7
+#define BUNKER_POSITION_Y   SCREEN_HEIGHT - SHIP_HEIGHT - GUN_HEIGHT - 3 * BUNKER_CELL_SIZE - 2 * PADDING
+
+
 typedef struct{
     coord_t position;
     int active;
@@ -111,12 +117,44 @@ typedef struct{
     SemaphoreHandle_t lock;
 }score_t;
 
+typedef struct{
+    int active;
+    coord_t position;  // the middle of the bunker. 
+    int width;
+}bunker_cell_t;
+
+
+typedef struct{
+    /*
+    a bunker that has the following shape.
+    each # stands for one cell that can be destroyed individually.
+
+    #####
+    #   #
+    #####
+
+    each row is represented as an array of cells. 
+    The value of row is the pointer to the first element in this row.
+
+    */
+    coord_t position;
+    bunker_cell_t *upper_row;
+    bunker_cell_t *middle_row;  // has three inactive cells in the middle
+    bunker_cell_t *lower_row;
+    SemaphoreHandle_t lock;
+}bunker_t;
+
 
 typedef struct {
+    /* a single object which holds pointers to all the other obejcts.
+    
+    is mainly used to be passed to the different tasks so that every task can access all the information.
+    */
     spaceship_t *my_spaceship;
     bullet_t *my_bullet;
     bullet_t **alien_bullets;
     alien_matrix_t *alien_matrix;  //first_row->first_column = first_alien; starting at top left of screen
+    bunker_t **bunkers;  // pointer to the first bunker
     score_t *score;
     SemaphoreHandle_t lock;
 } game_objects_t;

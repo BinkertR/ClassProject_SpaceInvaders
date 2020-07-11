@@ -1,3 +1,7 @@
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
+#include "task.h"
 
 #include "TUM_Draw.h"
 
@@ -100,6 +104,48 @@ score_t *ScoreInit() {
     return score;
 }
 
+bunker_t **BunkerInit() {
+    /*
+    init the bunkers as an array and return the pointer to the first bunker.
+    */
+
+    bunker_t **bunker = pvPortMalloc(sizeof(bunker_t *) * NUMBER_OF_BUNKERS);
+    
+    for (int i = 0; i < NUMBER_OF_BUNKERS; i++) {
+        bunker[i] = pvPortMalloc(sizeof(bunker_t));
+
+        bunker[i]->position.x = SCREEN_WIDTH / NUMBER_OF_BUNKERS * i + BUNKER_CELL_SIZE * BUNKER_X_CELLS_NUMBER;
+        bunker[i]->position.y = BUNKER_POSITION_Y; 
+        bunker[i]->upper_row = pvPortMalloc(sizeof(bunker_cell_t) * BUNKER_X_CELLS_NUMBER);
+        bunker[i]->middle_row = pvPortMalloc(sizeof(bunker_cell_t) * BUNKER_X_CELLS_NUMBER);
+        bunker[i]->lower_row = pvPortMalloc(sizeof(bunker_cell_t) * BUNKER_X_CELLS_NUMBER);
+
+        for (int k = 0; k < BUNKER_X_CELLS_NUMBER; k++) {
+            // init all cells of the upper row
+            bunker[i]->upper_row[k].active = OBJ_ACTIVE;
+            bunker[i]->upper_row[k].position.x = bunker[i]->position.x + k * BUNKER_CELL_SIZE;
+            bunker[i]->upper_row[k].position.y = bunker[i]->position.y;
+
+            // init all cells of the middle row as passive (only the leftest and the rightes cell will be set to active after this loop)
+            bunker[i]->middle_row[k].active = OBJ_PASSIVE;
+            bunker[i]->middle_row[k].position.x = bunker[i]->position.x + k * BUNKER_CELL_SIZE;
+            bunker[i]->middle_row[k].position.y = bunker[i]->position.y + BUNKER_CELL_SIZE;
+
+            // init all cells of the lower row as active
+            bunker[i]->lower_row[k].active = OBJ_ACTIVE;
+            bunker[i]->lower_row[k].position.x = bunker[i]->position.x + k * BUNKER_CELL_SIZE;
+            bunker[i]->lower_row[k].position.y = bunker[i]->position.y + BUNKER_CELL_SIZE * 2;
+
+        }
+        // set only the two outside bunker cells to active to form a hole in the middle of the bunker
+        bunker[i]->middle_row[0].active = OBJ_ACTIVE;
+        bunker[i]->middle_row[BUNKER_X_CELLS_NUMBER - 1].active = OBJ_ACTIVE;
+
+        bunker[i]->lock = xSemaphoreCreateMutex(); // Locking mechanism         
+    }
+    return bunker;
+}
+
 game_objects_t *game_objects_init() {
     game_objects_t *game_objects = pvPortMalloc(sizeof(game_objects_t));
     game_objects->my_spaceship = SpaceShipInit();
@@ -107,6 +153,7 @@ game_objects_t *game_objects_init() {
     game_objects->alien_bullets = AlienBulletInit();
     game_objects->alien_matrix = AlienInitMatrix();
     game_objects->score = ScoreInit();
+    game_objects->bunkers = BunkerInit();
     game_objects->lock = xSemaphoreCreateMutex();
     return game_objects;
 }

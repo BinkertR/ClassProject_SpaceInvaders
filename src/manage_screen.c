@@ -13,6 +13,7 @@
 #include "spaceship.h"
 #include "bullet.h"
 #include "alien.h"
+#include "bunkers.h"
 
 
 TaskHandle_t ManageScreenTask = NULL;
@@ -48,6 +49,8 @@ void vManageScreenTask(game_objects_t *my_gameobjects){
         BulletAlienDraw(my_gameobjects);
 
         AlienDrawMatrix(my_gameobjects);
+
+        BunkersDraw(my_gameobjects);
 
         //draw score
         if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {

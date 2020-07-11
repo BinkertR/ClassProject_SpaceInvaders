@@ -16,7 +16,7 @@ int BulletAlienDraw(game_objects_t *gameobjects) {
     bullet_t *current_alien_bullet;
     coord_t bullet_draw_position;
 
-    // calc alien bullets
+    // draw alien bullets
     for (int i = 0; i < MAX_ACTIVE_ALIEN_BULLETS; i++) {
         current_alien_bullet = gameobjects->alien_bullets[i];
         if (xSemaphoreTake(current_alien_bullet->lock, 0) == pdTRUE) {
@@ -82,7 +82,7 @@ int check_ship_hit(spaceship_t *my_spaceship, bullet_t *my_bullet) {
     return hit;
 }
 
-void vCalcBulletTask(game_objects_t *my_gameobjects){
+void vCalcBulletsTask(game_objects_t *my_gameobjects){
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
     bullet_t *current_alien_bullet = pvPortMalloc(sizeof(bullet_t));
     spaceship_t *my_spaceship = pvPortMalloc(sizeof(spaceship_t));
@@ -137,7 +137,7 @@ void vCalcBulletTask(game_objects_t *my_gameobjects){
 }
 
 int BulletInitCalcTask(game_objects_t *my_game_objects) {
-    if (xTaskCreate(vCalcBulletTask, "CalcBulletTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
+    if (xTaskCreate(vCalcBulletsTask, "CalcBulletTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &ManageBulletTask) != pdPASS) {
         printf("Failed to create Tast MangaeButtonInit");
         return EXIT_FAILURE;

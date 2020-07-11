@@ -22,6 +22,7 @@
 #include "bullet.h"
 #include "manage_button_input.h"
 #include "alien.h"
+#include "bunkers.h"
 
 // #include "AsyncIO.h"
 
@@ -71,7 +72,8 @@ int create_tasks() {
 
     BulletInitCalcTask(game_objects);
 
-    //AlienInitCalcSingleTask(game_objects);
+    BunkersInitManageTask(game_objects);
+
     AlienInitCalcMatrixTask(game_objects);
 
     return EXIT_SUCCESS;
