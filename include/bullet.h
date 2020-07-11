@@ -14,6 +14,6 @@ int BulletAlienDraw(game_objects_t *gameobjects);
 
 int BulletDraw(bullet_t *my_bullet);
 
-int BulletInitCalcTask(game_objects_t *my_game_objects);
+TaskHandle_t BulletInitCalcTask(game_objects_t *my_game_objects);
 
 #endif /*TEST_BULLET_H*/

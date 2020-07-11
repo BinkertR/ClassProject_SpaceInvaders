@@ -136,11 +136,11 @@ void vCalcBulletsTask(game_objects_t *my_gameobjects){
     }
 }
 
-int BulletInitCalcTask(game_objects_t *my_game_objects) {
+TaskHandle_t BulletInitCalcTask(game_objects_t *my_game_objects) {
     if (xTaskCreate(vCalcBulletsTask, "CalcBulletTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &ManageBulletTask) != pdPASS) {
         printf("Failed to create Tast MangaeButtonInit");
-        return EXIT_FAILURE;
+        return NULL;
     }
-    return EXIT_SUCCESS;
+    return ManageBulletTask;
 }

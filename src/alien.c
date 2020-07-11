@@ -316,11 +316,11 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     }
 }
 
-int AlienInitCalcMatrixTask(game_objects_t *my_game_objects) {
+TaskHandle_t AlienInitCalcMatrixTask(game_objects_t *my_game_objects) {
     if (xTaskCreate(vAlienCalcMatrixTask, "AlienCalcMatrixTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &AlienCalcMatrixTask) != pdPASS) {
         printf("Failed to create Task AlienCalcMatrixTask");
-        return EXIT_FAILURE;
+        return NULL;
     }
-    return EXIT_SUCCESS;
+    return AlienCalcMatrixTask;
 }

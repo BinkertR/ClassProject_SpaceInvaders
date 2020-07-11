@@ -129,11 +129,11 @@ void vManageBunkersTask(game_objects_t *my_gameobjects){
     }
 }
 
-int BunkersInitManageTask(game_objects_t *my_game_objects) {
+TaskHandle_t BunkersInitManageTask(game_objects_t *my_game_objects) {
     if (xTaskCreate(vManageBunkersTask, "ManageBunkersTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &ManageBunkersTask) != pdPASS) {
         printf("Failed to create Tast ManageBunkersTask");
-        return EXIT_FAILURE;
+        return NULL;
     }
-    return EXIT_SUCCESS;
+    return ManageBunkersTask;
 }

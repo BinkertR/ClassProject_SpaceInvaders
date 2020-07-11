@@ -63,18 +63,29 @@ int init_tum_lib(char *argv[]) {
 
 int create_tasks() {
     // first create the game objects for all the tasks, so they can be passed to the tasks
+    tasks_and_game_objects_t *tasks_and_game_objects;
     game_objects_t *game_objects = game_objects_init();
+    tasks_and_game_objects->game_task_handlers = pvPortMalloc(sizeof(taskhandle_array_t));
+    tasks_and_game_objects->game_task_handlers->tasks = pvPortMalloc(sizeof(TaskHandle_t) * 4);
+
+    tasks_and_game_objects->game_objects = game_objects_init();
+    //TaskHandle_t game_screen_task, bullet_task, bunkers_task, alien_task;
+    //TaskHandle_t game_tasks = pvPortMalloc(sizeof(TaskHandle_t) * 4);
     
     //create all the tasks so they can be started by the scheduler
-    ManageScreenInit(game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[0] = ManageGameScreenInit(game_objects);
 
-    MangageButtonInit(game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[1] = BulletInitCalcTask(game_objects);
 
-    BulletInitCalcTask(game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[2] = BunkersInitManageTask(game_objects);
 
-    BunkersInitManageTask(game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[3] = AlienInitCalcMatrixTask(game_objects);
 
-    AlienInitCalcMatrixTask(game_objects);
+    tasks_and_game_objects->game_task_handlers->length = 4;
+    tasks_and_game_objects->game_objects = game_objects;
+
+    // this task will be initialized with a higher priority since it is responsible for managing all the other tasks
+    MangageButtonInit(tasks_and_game_objects);
 
     return EXIT_SUCCESS;
 

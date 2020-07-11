@@ -159,6 +159,18 @@ typedef struct {
     SemaphoreHandle_t lock;
 } game_objects_t;
 
+typedef struct {
+    TaskHandle_t *tasks;
+    int length;
+}taskhandle_array_t;
+
+typedef struct{
+    /* a datatype to be passed to the manage button tasks so it has access to all the taskshandles and the game_objects*/
+    game_objects_t *game_objects;
+    taskhandle_array_t *game_task_handlers;
+}tasks_and_game_objects_t;
+
+
 alien_matrix_t *AlienInitMatrix();
 game_objects_t *game_objects_init();
 

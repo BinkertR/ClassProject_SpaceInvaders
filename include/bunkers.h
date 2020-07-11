@@ -6,6 +6,6 @@
 
 int BunkersDraw(game_objects_t *gameobjects);
 
-int BunkersInitManageTask(game_objects_t *my_game_objects);
+TaskHandle_t BunkersInitManageTask(game_objects_t *my_game_objects);
 
 #endif // TEST_BUNKERS_H
