@@ -16,14 +16,30 @@
 
 #define SCREEN_FREQUENCY    1000/60
 
-#define PADDING         10
-
-#define BULLET_HEIGHT   5
-#define BULLET_WIDTH    2
 #define OBJ_ACTIVE      1
 #define OBJ_PASSIVE     0
+
+#define PADDING         10
+
+// game states
+#define GAME_PRE_START  0
+#define GAME_RUNNING    1
+#define GAME_PAUSED     2
+#define GAME_NEXT_LEVEL 3
+#define GAME_ENDED      4
+
+#define PLAYER_LIFES    2  // Player lifes besides the first one
+#define LEVEL_SPEED_INCREASE_FAKTOR     2
+
+
+// in game needed definitions
+
+// bullet
+#define BULLET_HEIGHT   5
+#define BULLET_WIDTH    2
 #define BULLET_SPEED    7
 
+// spaceship
 #define SHIP_HEIGHT     10
 #define SHIP_WIDTH      50
 #define GUN_HEIGHT      10
@@ -33,9 +49,7 @@
 #define SHIP_X_MIN      PADDING + SHIP_WIDTH / 2
 #define SHIP_Y_CO       SCREEN_HEIGHT - PADDING - SHIP_HEIGHT
 
-#define PLAYER_LIFES    2  // Player lifes besides the first one
-#define LEVEL_SPEED_INCREASE_FAKTOR     2
-
+// aliens
 #define ALIEN_EASY      10
 #define ALIEN_MIDDLE    20    
 #define ALIEN_HARD      30
@@ -52,10 +66,12 @@
 #define ALIEN_ACCELERATION      0.05
 #define ALIEN_Y_SPEED   5
 
+// alien bullets
 #define MAX_ACTIVE_ALIEN_BULLETS    10
 #define ALIEN_BULLET_SPEED  3
 #define RAND_SHOOT_CHANCE   1000  // 1 in RANDOM_SHOOT_CHANCE
 
+// bunkers
 #define NUMBER_OF_BUNKERS   5
 #define BUNKER_CELL_SIZE    7
 #define BUNKER_X_CELLS_NUMBER 7
@@ -164,14 +180,22 @@ typedef struct {
     int length;
 }taskhandle_array_t;
 
+typedef struct {
+    int game_state;
+    int highscore;
+    SemaphoreHandle_t lock;
+}game_info_t;
+
 typedef struct{
     /* a datatype to be passed to the manage button tasks so it has access to all the taskshandles and the game_objects*/
     game_objects_t *game_objects;
+    game_info_t *game_info;
     taskhandle_array_t *game_task_handlers;
 }tasks_and_game_objects_t;
 
 
 alien_matrix_t *AlienInitMatrix();
-game_objects_t *game_objects_init();
+int game_objects_init(game_objects_t *game_objects);
+tasks_and_game_objects_t *tasks_and_game_objects_init();
 
 #endif /*TEST_MYSTRUCTS_H*/

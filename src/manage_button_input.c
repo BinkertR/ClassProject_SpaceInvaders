@@ -41,17 +41,23 @@ void xGetButtonInput(void)
     }
 }
 
-int manageGameState(int game_running, taskhandle_array_t *Tasks) {
+int manageGameState(tasks_and_game_objects_t *tasks_and_game_objects) {
     /* pause/start all the game calculation tasks if the game is paused/restarted*/
-    if (game_running == OBJ_PASSIVE) {
-        for (int i = 0; i < Tasks->length; i++) {
-            vTaskSuspend(Tasks->tasks[i]);
+    //if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
+
+        if (tasks_and_game_objects->game_info->game_state == GAME_PAUSED  || tasks_and_game_objects->game_info->game_state == GAME_PRE_START) {
+            for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
+                vTaskSuspend(tasks_and_game_objects->game_task_handlers->tasks[i]);
+            }
+        } else if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
+            for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
+                vTaskResume(tasks_and_game_objects->game_task_handlers->tasks[i]);
+            }
         }
-    } else {
-        for (int i = 0; i < Tasks->length; i++) {
-            vTaskResume(Tasks->tasks[i]);
-        }
-    }
+        //xSemaphoreGive(tasks_and_game_objects->game_info->lock);
+    //}
+
+
     
 
 }
@@ -59,7 +65,6 @@ int manageGameState(int game_running, taskhandle_array_t *Tasks) {
 void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
     game_objects_t *my_gameobjects = tasks_and_game_objects->game_objects;
     taskhandle_array_t  *game_task_handle_array = tasks_and_game_objects->game_task_handlers;
-    int game_running = OBJ_ACTIVE;
 
     while (1) {
         tumEventFetchEvents(FETCH_EVENT_NONBLOCK | FETCH_EVENT_NO_GL_CHECK); // Query events backend for new events, ie. button presses
@@ -70,23 +75,48 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
             if (buttons.buttons[KEYCODE(Q)]) { // Equiv to SDL_SCANCODE_Q
                 exit(EXIT_SUCCESS);
             }
-            if (buttons.buttons[KEYCODE(P)]) { // use p to pause the game
-                game_running = !game_running;  // TODO debounce this button
-                manageGameState(game_running, game_task_handle_array);
-            }
-            
-            if (game_running) {
-                // manage in game buttons
-                if (buttons.buttons[KEYCODE(LEFT)]) {
-                    SpaceShipMoveLeft(my_gameobjects->my_spaceship);
+
+            if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
+                if (tasks_and_game_objects->game_info->game_state == GAME_PRE_START) {  // use S to start the game
+                    if (buttons.buttons[KEYCODE(S)]) { // use p to pause the game                
+                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
+                    }
                 }
-                if (buttons.buttons[KEYCODE(RIGHT)]) {
-                    SpaceShipMoveRight(my_gameobjects->my_spaceship);
+
+                if (buttons.buttons[KEYCODE(P)]) { // use p to pause the game                
+                    tasks_and_game_objects->game_info->game_state = GAME_PAUSED;
                 }
-                if (buttons.buttons[KEYCODE(SPACE)]) {
-                    // shot bullet
-                    BulletShoot(my_gameobjects->my_spaceship, my_gameobjects->my_bullet);
+
+                // manage buttons only available in the pause menu
+                if (tasks_and_game_objects->game_info->game_state == GAME_PAUSED) {
+                    if (buttons.buttons[KEYCODE(C)]) { // if the game is paused continue the game                    
+                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
+                    }
+                    if (buttons.buttons[KEYCODE(R)]) {  // restart the game
+                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING; // GAME_PRE_START;
+                        game_objects_init(tasks_and_game_objects->game_objects);  // reset the game object values to the inital value
+                    }
                 }
+
+                manageGameState(tasks_and_game_objects);    
+
+                
+                // manage buttons only available if the game is running
+                if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
+                    // manage in game buttons
+                    if (buttons.buttons[KEYCODE(LEFT)]) {
+                        SpaceShipMoveLeft(my_gameobjects->my_spaceship);
+                    }
+                    if (buttons.buttons[KEYCODE(RIGHT)]) {
+                        SpaceShipMoveRight(my_gameobjects->my_spaceship);
+                    }
+                    if (buttons.buttons[KEYCODE(SPACE)]) {
+                        // shot bullet
+                        BulletShoot(my_gameobjects->my_spaceship, my_gameobjects->my_bullet);
+                    }
+                }
+
+                xSemaphoreGive(tasks_and_game_objects->game_info->lock);
             }
 
             xSemaphoreGive(buttons.lock);

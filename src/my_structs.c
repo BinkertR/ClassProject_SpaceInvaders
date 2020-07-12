@@ -146,8 +146,8 @@ bunker_t **BunkerInit() {
     return bunker;
 }
 
-game_objects_t *game_objects_init() {
-    game_objects_t *game_objects = pvPortMalloc(sizeof(game_objects_t));
+int game_objects_init(game_objects_t *game_objects) {
+
     game_objects->my_spaceship = SpaceShipInit();
     game_objects->my_bullet = BulletInit(); 
     game_objects->alien_bullets = AlienBulletInit();
@@ -155,5 +155,20 @@ game_objects_t *game_objects_init() {
     game_objects->score = ScoreInit();
     game_objects->bunkers = BunkerInit();
     game_objects->lock = xSemaphoreCreateMutex();
-    return game_objects;
+    return 0;
+}
+
+tasks_and_game_objects_t *tasks_and_game_objects_init() {
+    tasks_and_game_objects_t *tasks_and_game_objects = pvPortMalloc(sizeof(tasks_and_game_objects_t));
+    tasks_and_game_objects->game_task_handlers = pvPortMalloc(sizeof(taskhandle_array_t));
+    tasks_and_game_objects->game_task_handlers->tasks = pvPortMalloc(sizeof(TaskHandle_t) * 4);
+    tasks_and_game_objects->game_info = pvPortMalloc(sizeof(game_info_t));
+    tasks_and_game_objects->game_objects = pvPortMalloc(sizeof(game_objects_t));
+    game_objects_init(tasks_and_game_objects->game_objects);
+
+    tasks_and_game_objects->game_info->game_state = GAME_PRE_START;
+    tasks_and_game_objects->game_info->highscore = 0;
+    tasks_and_game_objects->game_info->lock = xSemaphoreCreateMutex();
+
+    return tasks_and_game_objects;
 }
