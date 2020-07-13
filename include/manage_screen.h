@@ -3,6 +3,6 @@
 
 #define TEST_MANAGESCREEN_H  
 
-TaskHandle_t ManageGameScreenInit(game_objects_t *my_game_objects);
+TaskHandle_t ManageGameScreenInit(tasks_and_game_objects_t *tasks_and_game_objects);
 
 #endif /*TEST_MANAGESCREEN_H*/

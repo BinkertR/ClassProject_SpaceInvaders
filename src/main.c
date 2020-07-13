@@ -66,18 +66,19 @@ int create_tasks() {
     tasks_and_game_objects_t *tasks_and_game_objects = tasks_and_game_objects_init();
     
     //create all the tasks so they can be started by the scheduler
-    tasks_and_game_objects->game_task_handlers->tasks[0] = ManageGameScreenInit(tasks_and_game_objects->game_objects);
 
-    tasks_and_game_objects->game_task_handlers->tasks[1] = BulletInitCalcTask(tasks_and_game_objects->game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[0] = BulletInitCalcTask(tasks_and_game_objects->game_objects);
 
-    tasks_and_game_objects->game_task_handlers->tasks[2] = BunkersInitManageTask(tasks_and_game_objects->game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[1] = BunkersInitManageTask(tasks_and_game_objects->game_objects);
 
-    tasks_and_game_objects->game_task_handlers->tasks[3] = AlienInitCalcMatrixTask(tasks_and_game_objects->game_objects);
+    tasks_and_game_objects->game_task_handlers->tasks[2] = AlienInitCalcMatrixTask(tasks_and_game_objects->game_objects);
 
-    tasks_and_game_objects->game_task_handlers->length = 4;
+    tasks_and_game_objects->game_task_handlers->length = 3;
 
-    // this task will be initialized with a higher priority since it is responsible for managing all the other tasks
+    // this task will be initialized with a higher priority since it is responsible for managing all the other task
     MangageButtonInit(tasks_and_game_objects);
+
+    ManageGameScreenInit(tasks_and_game_objects);
 
     return EXIT_SUCCESS;
 

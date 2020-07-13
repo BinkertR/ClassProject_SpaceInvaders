@@ -28,9 +28,7 @@ bullet_t **AlienBulletInit() {
 
 spaceship_t *SpaceShipInit() {
     spaceship_t *my_spaceship = pvPortMalloc(sizeof(spaceship_t));
-    int x = 0;
-    x = SCREEN_WIDTH / 2 - SHIP_WIDTH / 2;
-    my_spaceship->position.x = x;
+    my_spaceship->position.x = SCREEN_WIDTH / 2 - SHIP_WIDTH / 2;;
     my_spaceship->position.y = SHIP_Y_CO;
     my_spaceship->lifes = PLAYER_LIFES;
     my_spaceship->lock = xSemaphoreCreateMutex(); // Locking mechanism

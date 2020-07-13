@@ -83,22 +83,18 @@ int check_ship_hit(spaceship_t *my_spaceship, bullet_t *my_bullet) {
 }
 
 void vCalcBulletsTask(game_objects_t *my_gameobjects){
-    bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
     bullet_t *current_alien_bullet = pvPortMalloc(sizeof(bullet_t));
-    spaceship_t *my_spaceship = pvPortMalloc(sizeof(spaceship_t));
-    my_bullet = my_gameobjects->my_bullet;
-    my_spaceship = my_gameobjects->my_spaceship;
 
     while (1) {
         // first calc spaceship bullet
         if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
-            if (my_bullet->active == OBJ_ACTIVE) {
-                my_bullet->position.y -= BULLET_SPEED;
-                if (my_bullet->position.y < PADDING) {
-                    my_bullet->active = OBJ_PASSIVE;
+            if (my_gameobjects->my_bullet->active == OBJ_ACTIVE) {
+                my_gameobjects->my_bullet->position.y -= BULLET_SPEED;
+                if (my_gameobjects->my_bullet->position.y < PADDING) {
+                    my_gameobjects->my_bullet->active = OBJ_PASSIVE;
                 }
             }
-            xSemaphoreGive(my_bullet->lock);
+            xSemaphoreGive(my_gameobjects->my_bullet->lock);
         }
         // calc alien bullets
         for (int i = 0; i < MAX_ACTIVE_ALIEN_BULLETS; i++) {
@@ -109,8 +105,8 @@ void vCalcBulletsTask(game_objects_t *my_gameobjects){
                     current_alien_bullet->position.y += ALIEN_BULLET_SPEED;
 
                     // check if ship got hit by bullet
-                    if (xSemaphoreTake(my_spaceship->lock, 0) == pdTRUE) {
-                        if (check_ship_hit(my_spaceship, current_alien_bullet)) {
+                    if (xSemaphoreTake(my_gameobjects->my_spaceship->lock, 0) == pdTRUE) {
+                        if (check_ship_hit(my_gameobjects->my_spaceship, current_alien_bullet)) {
                             current_alien_bullet->active = OBJ_PASSIVE; 
                             if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
                                 my_gameobjects->score->lifes_left -= 1;
@@ -120,7 +116,7 @@ void vCalcBulletsTask(game_objects_t *my_gameobjects){
                                 xSemaphoreGive(my_gameobjects->score->lock);
                             }
                         }
-                        xSemaphoreGive(my_spaceship->lock);
+                        xSemaphoreGive(my_gameobjects->my_spaceship->lock);
                     }
                     
 
