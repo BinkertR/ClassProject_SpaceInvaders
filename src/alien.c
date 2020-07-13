@@ -203,6 +203,12 @@ int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_spee
                                     current_alien->position.x += step_in_x;
                                     current_alien->position.y += step_in_y;
                                 }
+                                if (current_alien->position.y + ALIEN_WIDTH / 2 > SCREEN_HEIGHT)  {  // if one alien reached the bottom of the screen
+                                    if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
+                                        my_gameobjects->score->lifes_left = -1;  // set the players life to -1 so the game ends
+                                        xSemaphoreGive(my_gameobjects->score->lock);
+                                    }
+                                }
                             } 
 
                             xSemaphoreGive(current_alien->lock);
