@@ -1,3 +1,12 @@
+/*!
+ * SpaceInvaders
+ * @file alien.c
+ * @author Roman Binkert
+ * @date 20 June 2020
+ * @brief the functions to draw the aliens on the screen move them and remove them if they got hit by the bullet
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,8 +25,15 @@ image_handle_t alien_low_img_handle = NULL;
 image_handle_t alien_medium_img_handle = NULL;
 image_handle_t alien_high_img_handle = NULL;
 
-image_handle_t AlienLoadImg(int alien_score) {  // TODO 
-    image_handle_t alien_img;  //TODO store this so the same img doesn't need to be loaded multiple times
+image_handle_t AlienLoadImg(int alien_score) {  
+    /*!
+    Loads and scales the png img according to the score the alien should give when its destroyed. 
+        Store the img handle so it can be reused to display other aliens of the same kind
+        
+    @param alien_score: tje score that the alien should give when its killed (can be ALIEN_EASY, ALIEN_MIDDLE or ALIEN_HARD)
+    @return alien_img: the imange_handle for the alien.
+    */
+    image_handle_t alien_img; 
     int img_width = 0;
     float scale_factor = 1.0;
     if (alien_score == ALIEN_EASY) {
@@ -54,6 +70,10 @@ image_handle_t AlienLoadImg(int alien_score) {  // TODO
 }
 
 int AlienDrawSingle(alien_t *my_alien) {
+    /*! 
+    @brief Draws the alien if its active with the according picture on the specified position
+    @param my_alien: a struct of kind alien_t that should be drawn on my_alien.position (as the middle of the alien) if its active
+    */
     image_handle_t img;
     coord_t alien_draw_position;
     alien_draw_position.x = my_alien->position.x - ALIEN_WIDTH / 2;
@@ -69,6 +89,10 @@ int AlienDrawSingle(alien_t *my_alien) {
 }
 
 int AlienDrawMatrix(game_objects_t *my_gameobjects) {  
+    /*! 
+    @brief iterate through the alien_matrix to draw all currently active aliens
+    @param my_gameobjects pointer to the game_objects which also stores the alien_matrix
+    */
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     
     int matrix_size_x = ALIENS_PER_ROW, matrix_size_y = ALIENS_PER_COLUMN;
@@ -85,8 +109,12 @@ int AlienDrawMatrix(game_objects_t *my_gameobjects) {
     return 0;
 }
 
-
 int check_hit(alien_t *my_alien, bullet_t *my_bullet) {
+    /*! 
+    @brief checks if the alien is hit by the bullet
+    @param my_alien: Pointer to the alien
+    @param my_bullet: Pointer to the players bullet
+    */
     int hit = 0;
     if (my_alien->position.x - ALIEN_WIDTH / 2 < my_bullet->position.x + BULLET_SPEED && my_bullet->position.x - BULLET_WIDTH < my_alien->position.x + ALIEN_WIDTH / 2 ) {
         if (my_alien->position.y - ALIEN_WIDTH / 2 < my_bullet->position.y && my_bullet->position.y < my_alien->position.y + ALIEN_WIDTH / 2 ) {
@@ -97,6 +125,12 @@ int check_hit(alien_t *my_alien, bullet_t *my_bullet) {
 }
 
 int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
+    /*! 
+    @brief Checks if the alien got hit by the bullet and if so set bot (alien and bullet) to inactive
+    @param my_alien Pointer to the alien which is checked if it got hit if its active
+    @param my_bullet Pointer to the bullet that could hit the alien
+    @returns 1, if the alien got hit, returns 0 else
+    */
     // checks threadsafe if the alien got hit by the bullet
     // returns 1, if the alien got hit, returns 0 else
 
@@ -120,10 +154,13 @@ int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
 }
 
 int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_speed, float step_in_x, float step_in_y) {
-    // check for each active alien, if it got hit by the bullet
+    /*! 
+    @brief check for each active alien, if it got hit by the bullet
     // if it got hit set its status to passive and if applicable the status of the hole column
     // if an alien got hit, also adapt the current_alien_speed
     // move each alien according to the previously calculated steps in x and y direction
+    
+    */
 
     // define some vars for better readability
     alien_column_t *current_column = pvPortMalloc(sizeof(alien_column_t));  
@@ -190,7 +227,7 @@ int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_spee
 }
 
 int GetRandInt() {
-    // get a random number between 0 and 1000
+    // get a random number between 0 and RAND_SHOOT_CHANCE
     int random_int;
 
     random_int = (rand() % (RAND_SHOOT_CHANCE - 0 + 1)) + 0;
@@ -200,6 +237,7 @@ int GetRandInt() {
 
 int AlienShootBullet(game_objects_t *gameobjects) {
     // iterate through all active columns and give the lowest alien a chance to shoot a bullet
+
     alien_column_t *current_column; // = pvPortMalloc(sizeof(alien_column_t));
     bullet_t *current_bullet; // = pvPortMalloc(sizeof(bullet_t));
 
@@ -235,6 +273,11 @@ int AlienShootBullet(game_objects_t *gameobjects) {
 }
 
 void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
+    /*! 
+    @brief FreeRTOS task to move all the aliens, check if an alien got hit and trigger the alien bullets every SCREEN_FREQUENCY ticks.
+    
+    */
+
     alien_t *my_alien = pvPortMalloc(sizeof(alien_t));
     alien_matrix_t *alien_matrix = pvPortMalloc(sizeof(alien_matrix_t));
     alien_column_t *current_column = pvPortMalloc(sizeof(alien_column_t));
@@ -317,6 +360,9 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
 }
 
 TaskHandle_t AlienInitCalcMatrixTask(game_objects_t *my_game_objects) {
+    /*! 
+    @brief initialzie the vAlienCalcMatrixTask as a FreeRTOS Task
+    */
     if (xTaskCreate(vAlienCalcMatrixTask, "AlienCalcMatrixTask", mainGENERIC_STACK_SIZE * 2, my_game_objects,
                     mainGENERIC_PRIORITY, &AlienCalcMatrixTask) != pdPASS) {
         printf("Failed to create Task AlienCalcMatrixTask");

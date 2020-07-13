@@ -32,6 +32,23 @@ int DrawPauseMenu() {
     tumDrawText("[M] Return to main menu", x, SCREEN_HEIGHT - 100, White);
 }
 
+int DrawGameEnded(tasks_and_game_objects_t *tasks_and_game_objects) {
+    int x = SCREEN_WIDTH / 2 - 100;
+    
+    char score_text[50]; 
+    
+    if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+        sprintf(score_text, " You reached Score: %d  and Level: %d", 
+            tasks_and_game_objects->game_objects->score->current_score, tasks_and_game_objects->game_objects->score->level);
+        tumDrawText(&score_text, x, 100, White);
+        xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+    }   
+
+    tumDrawText("GAME ENDED", x, 50, White);
+
+    tumDrawText("[M] Return to main menu", x, SCREEN_HEIGHT - 100, White);
+}
+
 void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
 
     printf("Init Manage Screen");
@@ -48,7 +65,7 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
     tumDrawBindThread();
 
     xLastWakeTime = xTaskGetTickCount(); // Initialise the xLastWakeTime variable with the current time.
-    int current_game_state;
+    int current_game_state = GAME_PRE_START, current_highscore = 0;
 
     while(1) {  //TODO: change this to while the screen is active
         vTaskDelayUntil( &xLastWakeTime, xFrequency );  // start this task every xFrequency millisecond
@@ -65,6 +82,8 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
             DrawPregameMenu();
         } else if (current_game_state == GAME_PAUSED) {
             DrawPauseMenu();
+        } else if (current_game_state == GAME_ENDED) {
+            DrawGameEnded(tasks_and_game_objects);
         } else if (current_game_state == GAME_RUNNING) {
             SpaceShipDraw(tasks_and_game_objects->game_objects->my_spaceship);
 
@@ -77,10 +96,14 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
             BunkersDraw(tasks_and_game_objects->game_objects);
 
             //draw score
+            if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
+                current_highscore = tasks_and_game_objects->game_info->highscore;
+                xSemaphoreGive(tasks_and_game_objects->game_info->lock);
+            }
             if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
                 char score_text[50]; 
                 sprintf(score_text, "Score: %d   |   Highscore: %d   |   Level: %d   |   Lifes: %d   |   [P]ause game", 
-                    tasks_and_game_objects->game_objects->score->current_score, tasks_and_game_objects->game_objects->score->highscore, tasks_and_game_objects->game_objects->score->level, tasks_and_game_objects->game_objects->score->lifes_left);
+                    tasks_and_game_objects->game_objects->score->current_score, current_highscore, tasks_and_game_objects->game_objects->score->level, tasks_and_game_objects->game_objects->score->lifes_left);
                 tumDrawText(&score_text, 0, 0, White);
                 xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
             }   

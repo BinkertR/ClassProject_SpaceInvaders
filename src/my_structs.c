@@ -95,7 +95,6 @@ alien_matrix_t *AlienInitMatrix() {
 score_t *ScoreInit() {
     score_t *score = pvPortMalloc(sizeof(score_t));
     score->current_score = 0;
-    score->highscore = 0;
     score->level = 1;
     score->lifes_left = PLAYER_LIFES;
     score->lock = xSemaphoreCreateMutex(); // Locking mechanism

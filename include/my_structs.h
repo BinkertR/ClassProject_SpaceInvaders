@@ -1,3 +1,12 @@
+/*!
+ * SpaceInvaders
+ * @file my_structs.h
+ * @author Roman Binkert
+ * @date 19 June 2020
+ * @brief the structures to store all the game data needed by the different tasks shared via pointers and Semaphores.
+
+*/
+
 #include "TUM_Draw.h"
 
 #include "FreeRTOS.h"
@@ -79,33 +88,34 @@
 
 
 typedef struct{
-    coord_t position;
-    int active;
+    coord_t position;  // position of the middle of the bullet
+    int active;  // an integer to store if the bullet is currently active
     SemaphoreHandle_t lock;
 }bullet_t;
 
 typedef struct{
-    bullet_t **first_bullet;
+    bullet_t **first_bullet;  //pointer to the pointer of to the first of all possible alien bullets
     SemaphoreHandle_t lock;
 }alien_bullet_t;
 
 
 typedef struct{
-    coord_t position;
-    int lifes;
+    coord_t position;  // position of the middle of the spaceship
+    int lifes;         // lifes the player / spaceship has left
     SemaphoreHandle_t lock;
 }spaceship_t;
 
 typedef struct {
-    float x;
-    float y;
+    /* the float values are needed to keep track of movements smaller then one pixel per frame*/
+    float x;       // float x value of something 
+    float y;        // float y value of something
 }coord_float_t;
 
 typedef struct {
     coord_float_t position;  // using float to also keep track of position changes smaller then one pixel -> move every n screen ticks
-    int alien_score;
-    int active;
-    image_handle_t img_h;
+    int alien_score;    // the score the player receives when killing this alien
+    int active;         // an int to keep track if this alien is still active
+    image_handle_t img_h;   // the img_handle which can be used by TUMDraw to draw the picture to the screen
     SemaphoreHandle_t lock;   
 }alien_t;
 
@@ -113,7 +123,7 @@ typedef struct {
     alien_t **first_alien; // pointer to the pointer of the first alien in the column
     int lowest_active_alien;  // the number of the lowest(on screen) alien in this column (needed to see which alien can shoot).
     int *active_aliens;  //array with an entry for each alien. 1 if alien is active, else 0
-    int active;
+    int active;         // int to keep track if this alien column is active
     SemaphoreHandle_t lock;
 }alien_column_t;
 
@@ -127,16 +137,15 @@ typedef struct{
 
 typedef struct{
     int current_score;
-    int highscore;
     int level;
     int lifes_left;
     SemaphoreHandle_t lock;
 }score_t;
 
 typedef struct{
-    int active;
-    coord_t position;  // the middle of the bunker. 
-    int width;
+    int active;     // int to keep track if this bunker cell is still active (and should be displayed, used for calculations etc)
+    coord_t position;  // the middle of the bunker cell. 
+    int width;  // width and height of the bunker cell in pixels
 }bunker_cell_t;
 
 
@@ -153,7 +162,7 @@ typedef struct{
     The value of row is the pointer to the first element in this row.
 
     */
-    coord_t position;
+    coord_t position;  // the upper left corner of the bunker 
     bunker_cell_t *upper_row;
     bunker_cell_t *middle_row;  // has three inactive cells in the middle
     bunker_cell_t *lower_row;
@@ -176,7 +185,8 @@ typedef struct {
 } game_objects_t;
 
 typedef struct {
-    TaskHandle_t *tasks;
+    /* used to store an array of all the game calculating tasks so they can be stopped/resumed if the game is stopped/resumed*/
+    TaskHandle_t *tasks;  
     int length;
 }taskhandle_array_t;
 

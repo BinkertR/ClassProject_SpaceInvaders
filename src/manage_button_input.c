@@ -88,7 +88,26 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                     if (buttons.buttons[KEYCODE(P)]) { // use p to pause the game                
                         tasks_and_game_objects->game_info->game_state = GAME_PAUSED;
                     }
+                    // check if the player lost and if so store the highscore
+                    if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                        if (tasks_and_game_objects->game_objects->score->lifes_left < 0) {
+                            tasks_and_game_objects->game_info->game_state = GAME_ENDED;
+                            if (tasks_and_game_objects->game_objects->score > tasks_and_game_objects->game_info->highscore) {
+                                tasks_and_game_objects->game_info->highscore = tasks_and_game_objects->game_objects->score->current_score;
+                            }
+                        }
+                        xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                    }
                 }
+                
+                // manage buttons if game is ended
+                if (tasks_and_game_objects->game_info->game_state == GAME_ENDED) {
+                    if (buttons.buttons[KEYCODE(M)]) {  // Quit to main menu
+                        game_objects_init(tasks_and_game_objects->game_objects);  // reset the game object values to the inital value            
+                        tasks_and_game_objects->game_info->game_state = GAME_PRE_START; // GAME_PRE_START;
+                    }
+                }
+
 
                 // manage buttons only available in the pause menu
                 if (tasks_and_game_objects->game_info->game_state == GAME_PAUSED) {
@@ -117,8 +136,7 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                     if (buttons.buttons[KEYCODE(RIGHT)]) {
                         SpaceShipMoveRight(my_gameobjects->my_spaceship);
                     }
-                    if (buttons.buttons[KEYCODE(SPACE)]) {
-                        // shot bullet
+                    if (buttons.buttons[KEYCODE(SPACE)]) { // shot bullet
                         BulletShoot(my_gameobjects->my_spaceship, my_gameobjects->my_bullet);
                     }
                 }
