@@ -15,13 +15,15 @@
 #include "alien.h"
 #include "bunkers.h"
 
+#define BACKGROUND_IMG "../img/nebula.jpg"
 
 TaskHandle_t ManageScreenTask = NULL;
 
 int DrawPregameMenu() {
     int x = SCREEN_WIDTH / 2 - 100;
     tumDrawText("[S]tart new game", x, 50, White);
-    tumDrawText("[Q]uit", x, 100, White);
+    tumDrawText("[C]heat menu", x, 100, White);
+    tumDrawText("[Q]uit", x, SCREEN_HEIGHT - 100, White);
 }
 
 int DrawPauseMenu() {
@@ -49,6 +51,24 @@ int DrawGameEnded(tasks_and_game_objects_t *tasks_and_game_objects) {
     tumDrawText("[M] Return to main menu", x, SCREEN_HEIGHT - 100, White);
 }
 
+int DrawCheatMenu(tasks_and_game_objects_t *tasks_and_game_objects) {
+    int x = SCREEN_WIDTH / 2 - 100;
+
+    tumDrawText("CHEAT MENU", x, 50, White);
+
+    // draw state of infitive lifes cheat
+    if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+        if (tasks_and_game_objects->game_objects->score->infitive_lifes == 1) {
+            tumDrawText("[L] Infinitve lifes: activated", x, 100, White);
+        } else {
+            tumDrawText("[L] Infinitve lifes: deactivated", x, 100, White);
+        }
+        xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+    }
+
+    tumDrawText("[M] Return to main menu", x, SCREEN_HEIGHT - 100, White);
+}
+
 void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
 
     printf("Init Manage Screen");
@@ -57,6 +77,10 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
     TickType_t xLastWakeTime;
     const TickType_t xFrequency = SCREEN_FREQUENCY;
     
+    // load background img
+
+    image_handle_t background_img_handle = tumDrawLoadImage(BACKGROUND_IMG);
+    tumDrawSetLoadedImageScale(background_img_handle, SCREEN_HEIGHT * 1.0 / tumDrawGetLoadedImageHeight(background_img_handle));
 
     // Needed such that Gfx library knows which thread controlls drawing
     // Only one thread can call tumDrawUpdateScreen while and thread can call
@@ -77,6 +101,7 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
 
 
         tumDrawClear(Black); // Clear screen
+        tumDrawLoadedImage(background_img_handle, 0, 0);
         
         if (current_game_state == GAME_PRE_START) {
             DrawPregameMenu();
@@ -84,6 +109,8 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
             DrawPauseMenu();
         } else if (current_game_state == GAME_ENDED) {
             DrawGameEnded(tasks_and_game_objects);
+        } else if (current_game_state == GAME_CHEAT_MENU) {
+            DrawCheatMenu(tasks_and_game_objects);
         } else if (current_game_state == GAME_RUNNING) {
             SpaceShipDraw(tasks_and_game_objects->game_objects->my_spaceship);
 

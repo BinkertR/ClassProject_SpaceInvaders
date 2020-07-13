@@ -97,6 +97,7 @@ score_t *ScoreInit() {
     score->current_score = 0;
     score->level = 1;
     score->lifes_left = PLAYER_LIFES;
+    score->infitive_lifes = 0;
     score->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return score;
 }

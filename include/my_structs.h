@@ -36,6 +36,7 @@
 #define GAME_PAUSED     2
 #define GAME_NEXT_LEVEL 3
 #define GAME_ENDED      4
+#define GAME_CHEAT_MENU 5
 
 #define PLAYER_LIFES    2  // Player lifes besides the first one
 #define LEVEL_SPEED_INCREASE_FAKTOR     2
@@ -139,6 +140,7 @@ typedef struct{
     int current_score;
     int level;
     int lifes_left;
+    int infitive_lifes;  // if 1 the player doesn't loose lives
     SemaphoreHandle_t lock;
 }score_t;
 

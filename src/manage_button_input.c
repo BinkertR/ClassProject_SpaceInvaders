@@ -79,10 +79,22 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                         tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
                     }
                     if (buttons.buttons[KEYCODE(C)]) { // use C to get to the cheat menu
-                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
+                        tasks_and_game_objects->game_info->game_state = GAME_CHEAT_MENU;
                     }
 
                 }
+                if (tasks_and_game_objects->game_info->game_state == GAME_CHEAT_MENU) {
+                    if (buttons.buttons[KEYCODE(L)]) { // use L to activate infite lives
+                        if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                            tasks_and_game_objects->game_objects->score->infitive_lifes = !tasks_and_game_objects->game_objects->score->infitive_lifes;
+                            xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                        }
+                    }
+                    if (buttons.buttons[KEYCODE(M)]) {  // Quit to main menu        
+                        tasks_and_game_objects->game_info->game_state = GAME_PRE_START; // GAME_PRE_START;
+                    }
+                }
+
 
                 if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
                     if (buttons.buttons[KEYCODE(P)]) { // use p to pause the game                

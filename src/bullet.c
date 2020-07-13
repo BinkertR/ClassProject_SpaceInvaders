@@ -10,6 +10,8 @@
 
 #include "my_structs.h"
 
+#define ALIEN_BULLET_COLOR Red;
+
 TaskHandle_t ManageBulletTask = NULL;
 
 int BulletAlienDraw(game_objects_t *gameobjects) {
@@ -24,7 +26,7 @@ int BulletAlienDraw(game_objects_t *gameobjects) {
                 bullet_draw_position.x = current_alien_bullet->position.x - BULLET_WIDTH / 2;
                 bullet_draw_position.y = current_alien_bullet->position.y - BULLET_HEIGHT / 2;
 
-                tumDrawFilledBox(bullet_draw_position.x, bullet_draw_position.y, BULLET_WIDTH, BULLET_HEIGHT, Blue);
+                tumDrawFilledBox(bullet_draw_position.x, bullet_draw_position.y, BULLET_WIDTH, BULLET_HEIGHT, Red);
             }
             xSemaphoreGive(current_alien_bullet->lock);
         }
@@ -109,9 +111,10 @@ void vCalcBulletsTask(game_objects_t *my_gameobjects){
                         if (check_ship_hit(my_gameobjects->my_spaceship, current_alien_bullet)) {
                             current_alien_bullet->active = OBJ_PASSIVE; 
                             if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
-                                my_gameobjects->score->lifes_left -= 1;
-                                if (my_gameobjects->score->lifes_left < 0) {
-                                    // TODO PLAYER LOST
+                                if (my_gameobjects->score->infitive_lifes == 0) {
+                                    my_gameobjects->score->lifes_left -= 1;
+                                } else {
+                                    printf("Ship got hit but infitive lifes cheat is activated.");
                                 }
                                 xSemaphoreGive(my_gameobjects->score->lock);
                             }

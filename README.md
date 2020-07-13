@@ -1,3 +1,18 @@
+# Space Invaders 
+ > by Roman Binkert
+
+
+## Sources
+
+ - FreeRtosEmulator (see below)
+ - Alien Img: 
+      - pink alien (https://www.pngkey.com/png/full/192-1926447_space-invader-png.png)
+      - green alien (https://www.pngkey.com/png/full/7-79350_alien-png.png)
+      - yellow alien (https://www.pngkey.com/png/full/502-5027283_alien-icon-png.png)
+ - Background Img: (https://blogs.esa.int/space19plus/files/2019/03/nebula.jpg)
+
+
+
 # FreeRTOS Emulator
 
 <p>
