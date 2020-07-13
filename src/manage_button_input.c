@@ -41,25 +41,20 @@ void xGetButtonInput(void)
     }
 }
 
-int manageGameState(tasks_and_game_objects_t *tasks_and_game_objects) {
+int manageGameLogicTasks(tasks_and_game_objects_t *tasks_and_game_objects) {
+    // WARNING, this needs to be called from a function wich has the game_info->lock already taken
+
     /* pause/start all the game calculation tasks if the game is paused/restarted*/
-    //if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
 
-        if (tasks_and_game_objects->game_info->game_state == GAME_PAUSED  || tasks_and_game_objects->game_info->game_state == GAME_PRE_START) {
-            for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
-                vTaskSuspend(tasks_and_game_objects->game_task_handlers->tasks[i]);
-            }
-        } else if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
-            for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
-                vTaskResume(tasks_and_game_objects->game_task_handlers->tasks[i]);
-            }
+    if (tasks_and_game_objects->game_info->game_state == GAME_PAUSED  || tasks_and_game_objects->game_info->game_state == GAME_PRE_START) {
+        for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
+            vTaskSuspend(tasks_and_game_objects->game_task_handlers->tasks[i]);
         }
-        //xSemaphoreGive(tasks_and_game_objects->game_info->lock);
-    //}
-
-
-    
-
+    } else if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
+        for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
+            vTaskResume(tasks_and_game_objects->game_task_handlers->tasks[i]);
+        }
+    }
 }
 
 void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
@@ -72,19 +67,27 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
 
         if (xSemaphoreTake(buttons.lock, 0) == pdTRUE) {
             // manage buttons to pause / exit the game
-            if (buttons.buttons[KEYCODE(Q)]) { // Equiv to SDL_SCANCODE_Q
-                exit(EXIT_SUCCESS);
-            }
 
             if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
-                if (tasks_and_game_objects->game_info->game_state == GAME_PRE_START) {  // use S to start the game
-                    if (buttons.buttons[KEYCODE(S)]) { // use p to pause the game                
+
+                // manage buttons only available in the pre game menu
+                if (tasks_and_game_objects->game_info->game_state == GAME_PRE_START) {
+                    if (buttons.buttons[KEYCODE(Q)]) { // Equiv to SDL_SCANCODE_Q
+                        exit(EXIT_SUCCESS);
+                    }                    
+                    if (buttons.buttons[KEYCODE(S)]) { // use S to start the game
                         tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
                     }
+                    if (buttons.buttons[KEYCODE(C)]) { // use C to get to the cheat menu
+                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
+                    }
+
                 }
 
-                if (buttons.buttons[KEYCODE(P)]) { // use p to pause the game                
-                    tasks_and_game_objects->game_info->game_state = GAME_PAUSED;
+                if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
+                    if (buttons.buttons[KEYCODE(P)]) { // use p to pause the game                
+                        tasks_and_game_objects->game_info->game_state = GAME_PAUSED;
+                    }
                 }
 
                 // manage buttons only available in the pause menu
@@ -93,12 +96,16 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                         tasks_and_game_objects->game_info->game_state = GAME_RUNNING;
                     }
                     if (buttons.buttons[KEYCODE(R)]) {  // restart the game
-                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING; // GAME_PRE_START;
                         game_objects_init(tasks_and_game_objects->game_objects);  // reset the game object values to the inital value
+                        tasks_and_game_objects->game_info->game_state = GAME_RUNNING; // GAME_PRE_START;
+                    }
+                    if (buttons.buttons[KEYCODE(M)]) {  // Quit to main menu
+                        game_objects_init(tasks_and_game_objects->game_objects);  // reset the game object values to the inital value            
+                        tasks_and_game_objects->game_info->game_state = GAME_PRE_START; // GAME_PRE_START;
                     }
                 }
 
-                manageGameState(tasks_and_game_objects);    
+                manageGameLogicTasks(tasks_and_game_objects);  // WARNING, this needs to be called from a function wich has the game_info->lock already taken
 
                 
                 // manage buttons only available if the game is running

@@ -29,7 +29,7 @@ int DrawPauseMenu() {
     tumDrawText("PAUSED", x, 50, White);
     tumDrawText("[C]ontinue game", x, 100, White);
     tumDrawText("[R]estart game", x, 150, White);
-    tumDrawText("[Q]uit", x, SCREEN_HEIGHT - 100, White);
+    tumDrawText("[M] Return to main menu", x, SCREEN_HEIGHT - 100, White);
 }
 
 void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
@@ -79,7 +79,7 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
             //draw score
             if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
                 char score_text[50]; 
-                sprintf(score_text, "Score: %d   |   Highscore: %d   |   Level: %d   |   Lifes: %d", 
+                sprintf(score_text, "Score: %d   |   Highscore: %d   |   Level: %d   |   Lifes: %d   |   [P]ause game", 
                     tasks_and_game_objects->game_objects->score->current_score, tasks_and_game_objects->game_objects->score->highscore, tasks_and_game_objects->game_objects->score->level, tasks_and_game_objects->game_objects->score->lifes_left);
                 tumDrawText(&score_text, 0, 0, White);
                 xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
