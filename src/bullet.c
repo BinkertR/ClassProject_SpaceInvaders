@@ -9,6 +9,7 @@
 #include "TUM_Event.h"
 
 #include "my_structs.h"
+#include "mothership.h"
 
 #define ALIEN_BULLET_COLOR Red;
 
@@ -84,6 +85,28 @@ int check_ship_hit(spaceship_t *my_spaceship, bullet_t *my_bullet) {
     return hit;
 }
 
+int MothershipCheckHit(game_objects_t *game_objects) {
+    /*checks if the mothership got hit by the players bullet
+    WARNING: needs to be called with bullet->lock already taken 
+    */
+    int hit = 0;
+    if (xSemaphoreTake(game_objects->mothership->lock, 0) == pdTRUE) {
+        if (game_objects->mothership->active == OBJ_ACTIVE) {
+            if (game_objects->mothership->position.x - MOTHERSHIP_WIDTH / 2 < game_objects->my_bullet->position.x + BULLET_SPEED && game_objects->my_bullet->position.x - BULLET_WIDTH < game_objects->mothership->position.x + MOTHERSHIP_WIDTH / 2 ) {
+                if (game_objects->mothership->position.y - MOTHERSHIP_HEIGHT / 2 < game_objects->my_bullet->position.y && game_objects->my_bullet->position.y < game_objects->mothership->position.y + MOTHERSHIP_HEIGHT / 2 ) {
+                    game_objects->mothership->active = OBJ_PASSIVE;
+                    if (xSemaphoreTake(game_objects->score->lock, 0) == pdTRUE) {
+                        game_objects->score->current_score += MOTHERSHIP_SCORE;
+                        xSemaphoreGive(game_objects->score->lock);
+                    } 
+                }
+            }
+        }
+        xSemaphoreGive(game_objects->mothership->lock);
+    }
+    return hit;
+}
+
 void vCalcBulletsTask(game_objects_t *my_gameobjects){
     bullet_t *current_alien_bullet = pvPortMalloc(sizeof(bullet_t));
 
@@ -92,6 +115,9 @@ void vCalcBulletsTask(game_objects_t *my_gameobjects){
         if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
             if (my_gameobjects->my_bullet->active == OBJ_ACTIVE) {
                 my_gameobjects->my_bullet->position.y -= BULLET_SPEED;
+                if (MothershipCheckHit(my_gameobjects) == 1) {
+
+                }
                 if (my_gameobjects->my_bullet->position.y < PADDING) {
                     my_gameobjects->my_bullet->active = OBJ_PASSIVE;
                 }

@@ -6,7 +6,8 @@
 #include "TUM_Draw.h"
 
 #include "my_structs.h"
-#include "alien.h"
+#include "alien.h"      // to use load alien img function
+#include "mothership.h"  // to use load mothership img function
 
 bullet_t *BulletInit() {
     bullet_t *my_bullet = pvPortMalloc(sizeof(bullet_t));
@@ -28,12 +29,22 @@ bullet_t **AlienBulletInit() {
 
 spaceship_t *SpaceShipInit() {
     spaceship_t *my_spaceship = pvPortMalloc(sizeof(spaceship_t));
-    my_spaceship->position.x = SCREEN_WIDTH / 2 - SHIP_WIDTH / 2;;
+    my_spaceship->position.x = SCREEN_WIDTH / 2 - SHIP_WIDTH / 2;
     my_spaceship->position.y = SHIP_Y_CO;
     my_spaceship->lifes = PLAYER_LIFES;
     my_spaceship->lock = xSemaphoreCreateMutex(); // Locking mechanism
 
     return my_spaceship;
+}
+
+mothership_t *MothershipInit() {
+    mothership_t *mothership = pvPortMalloc(sizeof(mothership_t));
+    mothership->position.x = SCREEN_WIDTH / 2 - MOTHERSHIP_WIDTH / 2;
+    mothership->position.y = MOTHERSHIP_Y_CO;
+    mothership->img_h = MothershipLoadImg();
+    mothership->active = 1;
+    mothership->lock = xSemaphoreCreateMutex(); // Locking mechanism
+    return mothership;
 }
 
 alien_t *AlienInit(int alien_score) {
@@ -148,6 +159,7 @@ bunker_t **BunkerInit() {
 int game_objects_init(game_objects_t *game_objects) {
 
     game_objects->my_spaceship = SpaceShipInit();
+    game_objects->mothership = MothershipInit();
     game_objects->my_bullet = BulletInit(); 
     game_objects->alien_bullets = AlienBulletInit();
     game_objects->alien_matrix = AlienInitMatrix();

@@ -16,6 +16,7 @@
 #include "TUM_Sound.h"
 #include "TUM_Utils.h"
 
+/*include SpaceInvaders specific modules*/
 #include "my_structs.h"
 #include "manage_screen.h"
 #include "spaceship.h"
@@ -23,8 +24,8 @@
 #include "manage_button_input.h"
 #include "alien.h"
 #include "bunkers.h"
+#include "mothership.h"
 
-// #include "AsyncIO.h"
 
 #define mainGENERIC_PRIORITY (tskIDLE_PRIORITY)
 #define mainGENERIC_STACK_SIZE ((unsigned short)2560)
@@ -73,7 +74,9 @@ int create_tasks() {
 
     tasks_and_game_objects->game_task_handlers->tasks[2] = AlienInitCalcMatrixTask(tasks_and_game_objects->game_objects);
 
-    tasks_and_game_objects->game_task_handlers->length = 3;
+    tasks_and_game_objects->game_task_handlers->tasks[3] = MotherShipInitCalcTask(tasks_and_game_objects->game_objects);
+
+    tasks_and_game_objects->game_task_handlers->length = 4;
 
     // this task will be initialized with a higher priority since it is responsible for managing all the other task
     MangageButtonInit(tasks_and_game_objects);

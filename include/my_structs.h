@@ -60,6 +60,13 @@
 #define SHIP_X_MIN      PADDING + SHIP_WIDTH / 2
 #define SHIP_Y_CO       SCREEN_HEIGHT - PADDING - SHIP_HEIGHT
 
+// mothership
+#define MOTHERSHIP_WIDTH 40
+#define MOTHERSHIP_Y_CO PADDING * 3
+#define MOTHERSHIP_SPEED 4
+#define MOTHERSHIP_HEIGHT 20
+#define MOTHERSHIP_SCORE  400
+
 // aliens
 #define ALIEN_EASY      10
 #define ALIEN_MIDDLE    20    
@@ -70,7 +77,7 @@
 #define ALIEN_PADDING_X 25
 #define ALIEN_PADDING_Y 10
 #define ALIEN_START_X   50
-#define ALIEN_START_Y   50
+#define ALIEN_START_Y   50 + MOTHERSHIP_HEIGHT
 #define ALIEN_MIN_X     20
 #define ALIEN_MAX_X     SCREEN_WIDTH - ALIEN_MIN_X
 #define ALIEN_X_SPEED   0.05
@@ -109,6 +116,8 @@ typedef struct{
 
 typedef struct{
     coord_t position;  // position of the middle of the mothership
+    image_handle_t img_h;   // the img_handle which can be used by TUMDraw to draw the picture to the screen
+    int active;  // keep track if the mothership is currently active (used to send PAUSE/RESUME)
     SemaphoreHandle_t lock;
 }mothership_t;
 
@@ -186,6 +195,7 @@ typedef struct {
     is mainly used to be passed to the different tasks so that every task can access all the information.
     */
     spaceship_t *my_spaceship;
+    mothership_t *mothership;
     bullet_t *my_bullet;
     bullet_t **alien_bullets;
     alien_matrix_t *alien_matrix;  //first_row->first_column = first_alien; starting at top left of screen

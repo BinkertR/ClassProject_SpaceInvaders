@@ -14,6 +14,7 @@
 #include "bullet.h"
 #include "alien.h"
 #include "bunkers.h"
+#include "mothership.h"
 
 #define BACKGROUND_IMG "../img/nebula.jpg"
 
@@ -136,6 +137,8 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
             AlienDrawMatrix(tasks_and_game_objects->game_objects);
 
             BunkersDraw(tasks_and_game_objects->game_objects);
+
+            MothershipDraw(tasks_and_game_objects->game_objects);
 
             //draw score
             if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {

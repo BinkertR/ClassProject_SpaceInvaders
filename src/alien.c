@@ -4,6 +4,8 @@
  * @author Roman Binkert
  * @date 20 June 2020
  * @brief the functions to draw the aliens on the screen move them and remove them if they got hit by the bullet
+ * 
+ * The AlienCalcMatricTask is also responsible for level updates
 
 */
 
@@ -76,14 +78,14 @@ int AlienDrawSingle(alien_t *my_alien) {
     */
     image_handle_t img;
     coord_t alien_draw_position;
-    alien_draw_position.x = my_alien->position.x - ALIEN_WIDTH / 2;
-    alien_draw_position.y = my_alien->position.y - ALIEN_WIDTH / 2;  //TODO Make this to alien Height
-    if (xSemaphoreTake((*my_alien).lock, 0) == pdTRUE) {
+    if (xSemaphoreTake(my_alien->lock, 0) == pdTRUE) {
         if (my_alien->active == OBJ_ACTIVE) {
+            alien_draw_position.x = my_alien->position.x - ALIEN_WIDTH / 2;
+            alien_draw_position.y = my_alien->position.y - ALIEN_WIDTH / 2;  //TODO Make this to alien Height
             img = my_alien->img_h;
             tumDrawLoadedImage(img, alien_draw_position.x, alien_draw_position.y);
         }
-        xSemaphoreGive((*my_alien).lock);   
+        xSemaphoreGive(my_alien->lock);   
     }    
     return 0;
 }
@@ -344,12 +346,13 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
         }
         if (leftest_active_column_int == ALIENS_PER_ROW - 1 && rightest_active_column_int == 0) {
             // player killed all aliens in this stage
-            // reload aliens for next level
             printf("You won this level");
+            // reload aliens for next level
             if (xSemaphoreTake(my_gameobjects->lock, 0) == pdTRUE) {
                 my_gameobjects->alien_matrix = AlienInitMatrix();
                 xSemaphoreGive(my_gameobjects->lock);
             }
+            // add one life every second level but dont exceed PLAYER_LIFES
             if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
                 my_gameobjects->score->level += 1;
                 if (my_gameobjects->score->level % 2 == 0 && my_gameobjects->score->lifes_left < PLAYER_LIFES) {
@@ -357,6 +360,12 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
                 }
                 xSemaphoreGive(my_gameobjects->score->lock);
             }
+            // activate the mothership again
+            if (xSemaphoreTake(my_gameobjects->mothership->lock, 0) == pdTRUE) {
+                my_gameobjects->mothership->active = OBJ_ACTIVE;
+                xSemaphoreGive(my_gameobjects->mothership->lock);
+            }
+
             alien_matrix = my_gameobjects->alien_matrix;
             leftest_active_column = my_gameobjects->alien_matrix->first_column[leftest_active_column_int];
             rightest_active_column = my_gameobjects->alien_matrix->first_column[rightest_active_column_int];
