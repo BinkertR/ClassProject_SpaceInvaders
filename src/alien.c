@@ -352,6 +352,9 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
             }
             if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
                 my_gameobjects->score->level += 1;
+                if (my_gameobjects->score->level % 2 == 0 && my_gameobjects->score->lifes_left < PLAYER_LIFES) {
+                    my_gameobjects->score->lifes_left += 1;
+                }
                 xSemaphoreGive(my_gameobjects->score->lock);
             }
             alien_matrix = my_gameobjects->alien_matrix;

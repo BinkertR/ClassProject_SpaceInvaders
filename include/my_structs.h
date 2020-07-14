@@ -39,7 +39,8 @@
 #define GAME_CHEAT_MENU 5
 
 #define PLAYER_LIFES    2  // Player lifes besides the first one
-#define LEVEL_SPEED_INCREASE_FAKTOR     0.4  // how much faster the aliens should move at the beginning of each level
+#define LIFE_BACK_EVERY_N_LEVELS        2       // the player gets one life back when the next level % this == 0
+#define LEVEL_SPEED_INCREASE_FAKTOR     2  // how much faster the aliens should move at the beginning of each level
 
 
 // in game needed definitions
@@ -72,8 +73,8 @@
 #define ALIEN_START_Y   50
 #define ALIEN_MIN_X     20
 #define ALIEN_MAX_X     SCREEN_WIDTH - ALIEN_MIN_X
-#define ALIEN_X_SPEED   0.2
-#define ALIEN_ACCELERATION      0.05   // how much faster the aliens should move per alien that was killed
+#define ALIEN_X_SPEED   0.05
+#define ALIEN_ACCELERATION      0.2   // how much faster the aliens should move per alien that was killed
 #define ALIEN_Y_SPEED   5
 
 // alien bullets
