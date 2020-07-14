@@ -65,16 +65,18 @@ int DrawCheatMenu(tasks_and_game_objects_t *tasks_and_game_objects) {
         }
         xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
     }
+
+    tumDrawText("Hold UP/DOWN and press L/S to increase decrease Level/Score", x - 100, 150, White);
     if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
             char LevelText[100];
             sprintf(LevelText, "[L] Current Starting level %d  (set in command line)", tasks_and_game_objects->game_objects->score->level);
-            tumDrawText(LevelText, x, 150, White);
+            tumDrawText(LevelText, x, 200, White);
         xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
     }
     if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
             char LevelText[100];
             sprintf(LevelText, "[S] Current Starting Score %d  (set in command line)", tasks_and_game_objects->game_objects->score->current_score);
-            tumDrawText(LevelText, x, 200, White);
+            tumDrawText(LevelText, x, 250, White);
         xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
     }
 

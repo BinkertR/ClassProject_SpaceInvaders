@@ -1,5 +1,5 @@
 #include <stddef.h>
-
+#include <time.h>
 #include <SDL2/SDL_scancode.h>
 
 #include "FreeRTOS.h"
@@ -15,6 +15,8 @@
 
 
 #define KEYCODE(CHAR) SDL_SCANCODE_##CHAR
+
+#define DEBOUNCE_DELAY 50  // in ms
 
 TaskHandle_t ManageButtonTask = NULL;
 
@@ -32,6 +34,13 @@ typedef struct count_button {
     } count_button_t;
 
 count_button_t count_p_button;
+
+typedef struct {
+    int lastButtonState;
+    int buttonState;
+    clock_t lastDebounceTime;
+    int buttonCode; // the SDL_SCANCODE of the button to check
+}debounce_t;
 
 void xGetButtonInput(void)
 {
@@ -57,9 +66,53 @@ int manageGameLogicTasks(tasks_and_game_objects_t *tasks_and_game_objects) {
     }
 }
 
+int debounceInitValues(debounce_t *debounce_values, int SDL_SCANCODE) {
+    debounce_values->buttonCode = SDL_SCANCODE;
+    debounce_values->buttonState = 0;
+    debounce_values->lastDebounceTime = clock();
+    debounce_values->lastButtonState = 0;
+    return EXIT_SUCCESS;
+}
+
+int debounceButton(debounce_t *debounce_values) {
+    /*!
+    @brief checks if a button is pressed with debouncing it.
+    @returns 1 if buttons is pressed
+    @returns 0 if buttons is not pressed
+    @returns NULL if the state is undefined
+    */
+
+    int button_pressed = NULL;
+    if (buttons.buttons[debounce_values->buttonCode] != debounce_values->lastButtonState) {
+        debounce_values->lastDebounceTime = clock();
+    }
+    if ((clock() - debounce_values->lastDebounceTime) > DEBOUNCE_DELAY) {
+        if (buttons.buttons[debounce_values->buttonCode] != debounce_values->buttonState) {
+            debounce_values->buttonState = buttons.buttons[debounce_values->buttonCode];
+
+            if (debounce_values->buttonState) {
+                button_pressed = 1;
+            } else {
+                button_pressed = 0;
+            }
+
+        }
+    } 
+    debounce_values->lastButtonState = buttons.buttons[debounce_values->buttonCode];
+    return button_pressed;
+}
+
 void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
     game_objects_t *my_gameobjects = tasks_and_game_objects->game_objects;
     taskhandle_array_t  *game_task_handle_array = tasks_and_game_objects->game_task_handlers;
+
+    // init debounce values
+    debounce_t *I_Debounce = pvPortMalloc(sizeof(debounce_t));
+    debounceInitValues(I_Debounce, KEYCODE(I));
+    debounce_t *S_Debounce = pvPortMalloc(sizeof(debounce_t));
+    debounceInitValues(S_Debounce, KEYCODE(S));
+    debounce_t *L_Debounce = pvPortMalloc(sizeof(debounce_t));
+    debounceInitValues(L_Debounce, KEYCODE(L));
 
     while (1) {
         tumEventFetchEvents(FETCH_EVENT_NONBLOCK | FETCH_EVENT_NO_GL_CHECK); // Query events backend for new events, ie. button presses
@@ -86,29 +139,40 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
 
                 // manage buttons only available in Cheat Menu
                 if (tasks_and_game_objects->game_info->game_state == GAME_CHEAT_MENU) {
-                    if (buttons.buttons[KEYCODE(I)]) { // use L to activate infite lives
+                    if (debounceButton(I_Debounce) == 1) { // use I to activate infite lives
                         if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
                             tasks_and_game_objects->game_objects->score->infitive_lifes = !tasks_and_game_objects->game_objects->score->infitive_lifes;
                             xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
                         }
                     }
-                    if (buttons.buttons[KEYCODE(S)]) {  // set the start score
-                        printf("Set the starting score: ");
-                        int startscore;
-                        scanf("%d", &startscore);
-                        if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
-                            tasks_and_game_objects->game_objects->score->current_score = startscore;
-                            xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
-                        }                        
+                    if (debounceButton(S_Debounce)) {  // set the start score
+                        if (buttons.buttons[KEYCODE(UP)]) {
+                            if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                                tasks_and_game_objects->game_objects->score->current_score += 500;
+                                xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                            } 
+                        }  
+                        if (buttons.buttons[KEYCODE(DOWN)]) {
+                            if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                                tasks_and_game_objects->game_objects->score->current_score -= 500;
+                                xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                            } 
+                        }                       
                     }
-                    if (buttons.buttons[KEYCODE(L)]) {  // set the start level
-                        printf("Set the starting level: ");
-                        int startlevel;
-                        scanf("%d", &startlevel);
-                        if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
-                            tasks_and_game_objects->game_objects->score->level = startlevel;
-                            xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
-                        }                        
+
+                    if (debounceButton(L_Debounce)) {  // set the start level
+                        if (buttons.buttons[KEYCODE(UP)]) {
+                            if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                                tasks_and_game_objects->game_objects->score->level += 1;
+                                xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                            } 
+                        }  
+                        if (buttons.buttons[KEYCODE(DOWN)]) {
+                            if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                                tasks_and_game_objects->game_objects->score->level -= 1;
+                                xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                            } 
+                        }                       
                     }
 
                     if (buttons.buttons[KEYCODE(M)]) {  // Quit to main menu        
