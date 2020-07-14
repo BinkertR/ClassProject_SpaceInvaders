@@ -39,7 +39,7 @@
 #define GAME_CHEAT_MENU 5
 
 #define PLAYER_LIFES    2  // Player lifes besides the first one
-#define LEVEL_SPEED_INCREASE_FAKTOR     2
+#define LEVEL_SPEED_INCREASE_FAKTOR     0.4  // how much faster the aliens should move at the beginning of each level
 
 
 // in game needed definitions
@@ -72,8 +72,8 @@
 #define ALIEN_START_Y   50
 #define ALIEN_MIN_X     20
 #define ALIEN_MAX_X     SCREEN_WIDTH - ALIEN_MIN_X
-#define ALIEN_X_SPEED   0.3
-#define ALIEN_ACCELERATION      0.05
+#define ALIEN_X_SPEED   0.2
+#define ALIEN_ACCELERATION      0.05   // how much faster the aliens should move per alien that was killed
 #define ALIEN_Y_SPEED   5
 
 // alien bullets
@@ -106,6 +106,11 @@ typedef struct{
     SemaphoreHandle_t lock;
 }spaceship_t;
 
+typedef struct{
+    coord_t position;  // position of the middle of the mothership
+    SemaphoreHandle_t lock;
+}mothership_t;
+
 typedef struct {
     /* the float values are needed to keep track of movements smaller then one pixel per frame*/
     float x;       // float x value of something 
@@ -133,6 +138,8 @@ typedef struct{
     int *active_columns;  //array with an entry for each column. 1 if column is active, else 0
     int leftest_active_column;  // the number of the most left column (needed to move the aliens always right to the side)
     int rightest_active_column;  // the number of the most right column (needed to move the aliens always right to the side)
+    float current_alien_x_speed;
+    int killed_aliens_in_stage;
     SemaphoreHandle_t lock;
 }alien_matrix_t;
 

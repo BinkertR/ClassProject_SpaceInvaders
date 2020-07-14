@@ -104,7 +104,6 @@ int debounceButton(debounce_t *debounce_values) {
 
 void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
     game_objects_t *my_gameobjects = tasks_and_game_objects->game_objects;
-    taskhandle_array_t  *game_task_handle_array = tasks_and_game_objects->game_task_handlers;
 
     // init debounce values
     debounce_t *I_Debounce = pvPortMalloc(sizeof(debounce_t));
@@ -240,7 +239,6 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
 
                 xSemaphoreGive(tasks_and_game_objects->game_info->lock);
             }
-
             xSemaphoreGive(buttons.lock);
         }
         vTaskDelay((TickType_t) (SCREEN_FREQUENCY));

@@ -153,7 +153,7 @@ int AlienCheckBullet(alien_t *my_alien, bullet_t *my_bullet) {
     return got_hit;
 }
 
-int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_speed, float step_in_x, float step_in_y) {
+int AlienIterateMatrix(game_objects_t *my_gameobjects, float step_in_x, float step_in_y) {
     /*! 
     @brief check for each active alien, if it got hit by the bullet
     // if it got hit set its status to passive and if applicable the status of the hole column
@@ -188,8 +188,8 @@ int AlienIterateMatrix(game_objects_t *my_gameobjects, float *current_alien_spee
                                 // if alien got hit: update speed and score, else: update position and lowest_active_alien
                                 if (AlienCheckBullet(current_alien, my_gameobjects->my_bullet) == 1) {  // for this the alien_lock needs to be taken
                                     // if the alien got hit
-                                    //increase the speed
-                                    *(current_alien_speed) += ALIEN_ACCELERATION;
+                                    // increase the alienskilled counter to adapt the alien speed
+                                    my_gameobjects->alien_matrix->killed_aliens_in_stage += 1;
                                     // increase the score
                                     if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
                                         my_gameobjects->score->current_score += current_alien->alien_score;
@@ -301,6 +301,12 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
     rightest_active_column = my_gameobjects->alien_matrix->first_column[rightest_active_column_int];
 
     while (1) {
+        if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE && xSemaphoreTake(my_gameobjects->alien_matrix->lock, 0) == pdTRUE) {
+            current_alien_speed = ALIEN_X_SPEED * (1 + my_gameobjects->score->level * LEVEL_SPEED_INCREASE_FAKTOR) * (1 + my_gameobjects->alien_matrix->killed_aliens_in_stage * ALIEN_ACCELERATION);
+            xSemaphoreGive(my_gameobjects->score->lock);
+            xSemaphoreGive(my_gameobjects->alien_matrix->lock);
+        }
+
         //set the moving steps, so that they can be applied to each alien during the bullet iteration
         // get the x value of the most left and the most right alien in the hole matrix to see if these aliens would be out of the screen
         current_min_x = leftest_active_column->first_alien[leftest_active_column->lowest_active_alien]->position.x;
@@ -320,7 +326,7 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
             }
         }
 
-        AlienIterateMatrix(my_gameobjects, &current_alien_speed, step_in_x, step_in_y);
+        AlienIterateMatrix(my_gameobjects, step_in_x, step_in_y);
 
         //update leftest and rightes active column
         leftest_active_column_int = ALIENS_PER_ROW - 1; 
@@ -346,7 +352,6 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
             }
             if (xSemaphoreTake(my_gameobjects->score->lock, 0) == pdTRUE) {
                 my_gameobjects->score->level += 1;
-                current_alien_speed = ALIEN_X_SPEED * my_gameobjects->score->level * LEVEL_SPEED_INCREASE_FAKTOR;
                 xSemaphoreGive(my_gameobjects->score->lock);
             }
             alien_matrix = my_gameobjects->alien_matrix;

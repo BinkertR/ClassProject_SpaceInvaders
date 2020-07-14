@@ -88,6 +88,7 @@ alien_matrix_t *AlienInitMatrix() {
     row->active_columns = &(active_colums[0]);
     row->leftest_active_column = 0;
     row->rightest_active_column = ALIENS_PER_ROW - 1;
+    row->killed_aliens_in_stage = 0;
     row->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return row;
 }
