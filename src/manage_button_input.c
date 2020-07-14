@@ -112,6 +112,8 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
     debounceInitValues(S_Debounce, KEYCODE(S));
     debounce_t *L_Debounce = pvPortMalloc(sizeof(debounce_t));
     debounceInitValues(L_Debounce, KEYCODE(L));
+    debounce_t *P_Debounce = pvPortMalloc(sizeof(debounce_t));
+    debounceInitValues(P_Debounce, KEYCODE(P));
 
     while (1) {
         tumEventFetchEvents(FETCH_EVENT_NONBLOCK | FETCH_EVENT_NO_GL_CHECK); // Query events backend for new events, ie. button presses
@@ -132,6 +134,18 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                     }
                     if (buttons.buttons[KEYCODE(C)]) { // use C to get to the cheat menu
                         tasks_and_game_objects->game_info->game_state = GAME_CHEAT_MENU;
+                    }
+                    // toggle game mode between single and AI. Also toggle the running task
+                    if (debounceButton(P_Debounce) == 1) {                        
+                        if (tasks_and_game_objects->game_info->playmode == PLAYMODE_SINGEPLAYER) {
+                            tasks_and_game_objects->game_info->playmode = PLAYMODE_AI_PLAYER;
+                            vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
+                            vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
+                        } else {
+                            tasks_and_game_objects->game_info->playmode = PLAYMODE_SINGEPLAYER;
+                            vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
+                            vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
+                        }
                     }
 
                 }

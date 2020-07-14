@@ -256,7 +256,7 @@ int AlienShootBullet(game_objects_t *gameobjects) {
         if (xSemaphoreTake(current_column->lock, 0) == pdTRUE) {
             if (current_column->active == OBJ_ACTIVE) {
                 r = GetRandInt();
-                if (r <= 1) {
+                if (r <= 1) {  // if the random integer is smaller then the shoot chance shoot a bullet
                     lowest_active_alien = current_column->lowest_active_alien;
                     for ( int k = 0; k < MAX_ACTIVE_ALIEN_BULLETS; k++) {  // get the first free alien bullet slot
                         current_bullet = gameobjects->alien_bullets[k];

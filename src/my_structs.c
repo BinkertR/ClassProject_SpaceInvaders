@@ -172,13 +172,18 @@ int game_objects_init(game_objects_t *game_objects) {
 tasks_and_game_objects_t *tasks_and_game_objects_init() {
     tasks_and_game_objects_t *tasks_and_game_objects = pvPortMalloc(sizeof(tasks_and_game_objects_t));
     tasks_and_game_objects->game_task_handlers = pvPortMalloc(sizeof(taskhandle_array_t));
-    tasks_and_game_objects->game_task_handlers->tasks = pvPortMalloc(sizeof(TaskHandle_t) * 4);
+    tasks_and_game_objects->game_task_handlers->tasks = pvPortMalloc(sizeof(TaskHandle_t) * GAME_GAME_TASKS_AMOUNT);
+
+    tasks_and_game_objects->playmode_task_handlers = pvPortMalloc(sizeof(taskhandle_array_t));
+    tasks_and_game_objects->playmode_task_handlers->tasks = pvPortMalloc(sizeof(TaskHandle_t) * GAME_PLAYMODE_TAKS_AMOUNT);
+
     tasks_and_game_objects->game_info = pvPortMalloc(sizeof(game_info_t));
     tasks_and_game_objects->game_objects = pvPortMalloc(sizeof(game_objects_t));
     game_objects_init(tasks_and_game_objects->game_objects);
 
     tasks_and_game_objects->game_info->game_state = GAME_PRE_START;
     tasks_and_game_objects->game_info->highscore = 0;
+    tasks_and_game_objects->game_info->playmode = PLAYMODE_SINGEPLAYER;
     tasks_and_game_objects->game_info->lock = xSemaphoreCreateMutex();
 
     return tasks_and_game_objects;

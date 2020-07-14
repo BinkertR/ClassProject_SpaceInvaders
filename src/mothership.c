@@ -30,6 +30,7 @@
 #define MOTHERSHIP_IMG "../img/mothership.png"
 
 TaskHandle_t MothershipCalcTask = NULL;
+TaskHandle_t MothershipAITask = NULL;
 
 image_handle_t MothershipLoadImg() {  
     /*!
@@ -94,13 +95,11 @@ void UDPHandler(size_t read_size, char *buffer, game_objects_t *game_objects) {
     }
 }
 
-void vMothershipControlTask(game_objects_t *game_objects)
+void vMothershipAITask(game_objects_t *game_objects)
 {
     static char buf[50];
     char *addr = NULL; // Loopback
     in_port_t port = UDP_RECEIVE_PORT;
-    unsigned int ball_y = 0;
-    unsigned int paddle_y = 0;
     char last_difficulty = -1;
     char difficulty = 1;
     int sent_pause = 0;  // should be 1 if pause was last sent and -1 if resume was last sent. Used to check if one of these messages needs to be send.
@@ -132,7 +131,7 @@ void vMothershipControlTask(game_objects_t *game_objects)
         }
         if (mothership_active == OBJ_ACTIVE) {
             // compute and send position difference to opponent
-            signed int diff = ball_y - paddle_y;
+            signed int diff = 0;
             if (xSemaphoreTake(game_objects->my_spaceship->lock, 0) == pdTRUE && xSemaphoreTake(game_objects->mothership->lock, 0) == pdTRUE) {
                 diff = game_objects->mothership->position.x - game_objects->my_spaceship->position.x;
                 xSemaphoreGive(game_objects->my_spaceship->lock);
@@ -169,11 +168,56 @@ void vMothershipControlTask(game_objects_t *game_objects)
     }
 }
 
-TaskHandle_t MotherShipInitCalcTask(game_objects_t *game_objects) {
+TaskHandle_t MothershipInitAITask(game_objects_t *game_objects) {
     /*! 
     @brief initialzie the vAlienCalcMatrixTask as a FreeRTOS Task
     */
-    if (xTaskCreate(vMothershipControlTask, "MothershipControlTask", mainGENERIC_STACK_SIZE * 2, game_objects,
+    if (xTaskCreate(vMothershipAITask, "MothershipAI", mainGENERIC_STACK_SIZE * 2, game_objects,
+                    mainGENERIC_PRIORITY, &MothershipAITask) != pdPASS) {
+        printf("Failed to create Task MothershipAI");
+        return NULL;
+    }
+    return MothershipAITask;
+}
+
+
+// functions for singleplayer
+
+int GetRandIntMothership() {
+    // get a random number between 0 and RAND_SHOOT_CHANCE
+    int random_int;
+
+    random_int = (rand() % (MOTHERHSIP_APPERANCE_CHANCE - 0 + 1)) + 0;
+
+    return random_int;
+}
+
+void vMothershipCalcTask(game_objects_t *game_objects) {
+    while (1)
+    {
+        if (xSemaphoreTake(game_objects->mothership->lock, 0) == pdTRUE) {
+            // if mothership is passive give it a chance to get active            
+            if (game_objects->mothership->active == OBJ_PASSIVE) {
+                int r = GetRandIntMothership();
+                if (r <= 1) {
+                    game_objects->mothership->active = OBJ_ACTIVE;
+                    game_objects->mothership->position.x = 0;  // TODO also start from the right side
+                }
+            }
+            if (game_objects->mothership->active == OBJ_ACTIVE) {
+                game_objects->mothership->position.x += MOTHERSHIP_SPEED;
+                if (game_objects->mothership->position.x > SCREEN_WIDTH) {
+                    game_objects->mothership->active = OBJ_PASSIVE;
+                }
+            }
+            xSemaphoreGive(game_objects->mothership->lock);
+        } 
+        vTaskDelay((TickType_t) (SCREEN_FREQUENCY));
+    }    
+}
+
+TaskHandle_t MotherShipInitCalcTask(game_objects_t *game_objects) {
+    if (xTaskCreate(vMothershipCalcTask, "vMothershipCalcTask", mainGENERIC_STACK_SIZE * 2, game_objects,
                     mainGENERIC_PRIORITY, &MothershipCalcTask) != pdPASS) {
         printf("Failed to create Task MothershipCalcTask");
         return NULL;

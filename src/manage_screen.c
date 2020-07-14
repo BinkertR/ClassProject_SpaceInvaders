@@ -20,10 +20,22 @@
 
 TaskHandle_t ManageScreenTask = NULL;
 
-int DrawPregameMenu() {
+int DrawPregameMenu(tasks_and_game_objects_t *tasks_and_game_objects) {
     int x = SCREEN_WIDTH / 2 - 100;
+    char score_text[50]; 
+    
+    if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
+        if (tasks_and_game_objects->game_info->playmode == PLAYMODE_SINGEPLAYER) {
+            sprintf(score_text, "[P]layer mode: Singleplayer");
+        } else {
+            sprintf(score_text, "[P]layer mode: AI Player");
+        }
+        tumDrawText(score_text, x, 100, White);
+        xSemaphoreGive(tasks_and_game_objects->game_info->lock);
+    }   
+
     tumDrawText("[S]tart new game", x, 50, White);
-    tumDrawText("[C]heat menu", x, 100, White);
+    tumDrawText("[C]heat menu", x, SCREEN_HEIGHT - 150, White);
     tumDrawText("[Q]uit", x, SCREEN_HEIGHT - 100, White);
 }
 
@@ -120,7 +132,7 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
         tumDrawLoadedImage(background_img_handle, 0, 0);
         
         if (current_game_state == GAME_PRE_START) {
-            DrawPregameMenu();
+            DrawPregameMenu(tasks_and_game_objects);
         } else if (current_game_state == GAME_PAUSED) {
             DrawPauseMenu();
         } else if (current_game_state == GAME_ENDED) {

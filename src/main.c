@@ -74,9 +74,13 @@ int create_tasks() {
 
     tasks_and_game_objects->game_task_handlers->tasks[2] = AlienInitCalcMatrixTask(tasks_and_game_objects->game_objects);
 
-    tasks_and_game_objects->game_task_handlers->tasks[3] = MotherShipInitCalcTask(tasks_and_game_objects->game_objects);
+    tasks_and_game_objects->game_task_handlers->length = GAME_GAME_TASKS_AMOUNT;
 
-    tasks_and_game_objects->game_task_handlers->length = 4;
+
+    tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER] = MothershipInitAITask(tasks_and_game_objects->game_objects);
+
+    tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER] = MotherShipInitCalcTask(tasks_and_game_objects->game_objects);
+    tasks_and_game_objects->playmode_task_handlers->length = GAME_PLAYMODE_TAKS_AMOUNT;
 
     // this task will be initialized with a higher priority since it is responsible for managing all the other task
     MangageButtonInit(tasks_and_game_objects);

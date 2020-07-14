@@ -38,6 +38,12 @@
 #define GAME_ENDED      4
 #define GAME_CHEAT_MENU 5
 
+#define PLAYMODE_SINGEPLAYER    1
+#define PLAYMODE_AI_PLAYER      0  // needs to be 0 and 1 because this is also used as index for array
+
+#define GAME_GAME_TASKS_AMOUNT  3
+#define GAME_PLAYMODE_TAKS_AMOUNT 2
+
 #define PLAYER_LIFES    2  // Player lifes besides the first one
 #define LIFE_BACK_EVERY_N_LEVELS        2       // the player gets one life back when the next level % this == 0
 #define LEVEL_SPEED_INCREASE_FAKTOR     2  // how much faster the aliens should move at the beginning of each level
@@ -63,9 +69,10 @@
 // mothership
 #define MOTHERSHIP_WIDTH 40
 #define MOTHERSHIP_Y_CO PADDING * 3
-#define MOTHERSHIP_SPEED 4
+#define MOTHERSHIP_SPEED 2
 #define MOTHERSHIP_HEIGHT 20
 #define MOTHERSHIP_SCORE  400
+#define MOTHERHSIP_APPERANCE_CHANCE 3000  // 1 in MOTHERHSIP_APPERANCE_CHANCE
 
 // aliens
 #define ALIEN_EASY      10
@@ -213,6 +220,7 @@ typedef struct {
 typedef struct {
     int game_state;
     int highscore;
+    int playmode;
     SemaphoreHandle_t lock;
 }game_info_t;
 
@@ -221,6 +229,7 @@ typedef struct{
     game_objects_t *game_objects;
     game_info_t *game_info;
     taskhandle_array_t *game_task_handlers;
+    taskhandle_array_t *playmode_task_handlers;
 }tasks_and_game_objects_t;
 
 

@@ -18,6 +18,8 @@ int MothershipDraw(game_objects_t *game_objects);
 
 image_handle_t MothershipLoadImg();
 
-TaskHandle_t MotherShipInitCalcTask(game_objects_t *my_game_objects);
+TaskHandle_t MothershipInitAITask(game_objects_t *my_game_objects);
+
+TaskHandle_t MotherShipInitCalcTask(game_objects_t *game_objects);
 
 #endif /*TEST_MOTHERSHIP_H*/
