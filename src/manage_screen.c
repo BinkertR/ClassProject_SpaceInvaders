@@ -59,12 +59,25 @@ int DrawCheatMenu(tasks_and_game_objects_t *tasks_and_game_objects) {
     // draw state of infitive lifes cheat
     if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
         if (tasks_and_game_objects->game_objects->score->infitive_lifes == 1) {
-            tumDrawText("[L] Infinitve lifes: activated", x, 100, White);
+            tumDrawText("[I]nfinitve lifes: activated", x, 100, White);
         } else {
-            tumDrawText("[L] Infinitve lifes: deactivated", x, 100, White);
+            tumDrawText("[I]nfinitve lifes: deactivated", x, 100, White);
         }
         xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
     }
+    if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+            char LevelText[100];
+            sprintf(LevelText, "[L] Current Starting level %d  (set in command line)", tasks_and_game_objects->game_objects->score->level);
+            tumDrawText(LevelText, x, 150, White);
+        xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+    }
+    if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+            char LevelText[100];
+            sprintf(LevelText, "[S] Current Starting Score %d  (set in command line)", tasks_and_game_objects->game_objects->score->current_score);
+            tumDrawText(LevelText, x, 200, White);
+        xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+    }
+
 
     tumDrawText("[M] Return to main menu", x, SCREEN_HEIGHT - 100, White);
 }

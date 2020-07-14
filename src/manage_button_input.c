@@ -83,13 +83,34 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                     }
 
                 }
+
+                // manage buttons only available in Cheat Menu
                 if (tasks_and_game_objects->game_info->game_state == GAME_CHEAT_MENU) {
-                    if (buttons.buttons[KEYCODE(L)]) { // use L to activate infite lives
+                    if (buttons.buttons[KEYCODE(I)]) { // use L to activate infite lives
                         if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
                             tasks_and_game_objects->game_objects->score->infitive_lifes = !tasks_and_game_objects->game_objects->score->infitive_lifes;
                             xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
                         }
                     }
+                    if (buttons.buttons[KEYCODE(S)]) {  // set the start score
+                        printf("Set the starting score: ");
+                        int startscore;
+                        scanf("%d", &startscore);
+                        if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                            tasks_and_game_objects->game_objects->score->current_score = startscore;
+                            xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                        }                        
+                    }
+                    if (buttons.buttons[KEYCODE(L)]) {  // set the start level
+                        printf("Set the starting level: ");
+                        int startlevel;
+                        scanf("%d", &startlevel);
+                        if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
+                            tasks_and_game_objects->game_objects->score->level = startlevel;
+                            xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
+                        }                        
+                    }
+
                     if (buttons.buttons[KEYCODE(M)]) {  // Quit to main menu        
                         tasks_and_game_objects->game_info->game_state = GAME_PRE_START; // GAME_PRE_START;
                     }
