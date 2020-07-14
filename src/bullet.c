@@ -107,6 +107,18 @@ int MothershipCheckHit(game_objects_t *game_objects) {
     return hit;
 }
 
+int checkBulletHit(bullet_t *my_bullet, bullet_t *alien_bullet) {
+    /*check if the spaceship bullet and the alien bullet hits each other*/ 
+    //WARNING needs to be called with my_bullet->lock and alien_bullet->lock taken
+    int hit = 0;
+    if (my_bullet->position.x - BULLET_WIDTH / 2 < alien_bullet->position.x + BULLET_WIDTH && alien_bullet->position.x - BULLET_WIDTH < my_bullet->position.x + BULLET_WIDTH / 2 ) {
+        if (my_bullet->position.y - BULLET_HEIGHT / 2 < alien_bullet->position.y + BULLET_HEIGHT && alien_bullet->position.y - BULLET_HEIGHT < my_bullet->position.y + BULLET_HEIGHT / 2 ) {
+            hit = 1;
+        }
+    } 
+    return hit;
+}
+
 void vCalcBulletsTask(game_objects_t *my_gameobjects){
     bullet_t *current_alien_bullet = pvPortMalloc(sizeof(bullet_t));
 
@@ -147,8 +159,17 @@ void vCalcBulletsTask(game_objects_t *my_gameobjects){
                         }
                         xSemaphoreGive(my_gameobjects->my_spaceship->lock);
                     }
-                    
+                    // check if alien_bullet is hit by spaceship bullet
+                    if (xSemaphoreTake(my_gameobjects->my_bullet->lock, 0) == pdTRUE) {
+                        if(checkBulletHit(my_gameobjects->my_bullet, current_alien_bullet)) {
+                            current_alien_bullet->active = OBJ_PASSIVE;
+                            my_gameobjects->my_bullet->active = OBJ_PASSIVE;
+                        }
+                        xSemaphoreGive(my_gameobjects->my_bullet->lock);
+                    }
 
+                    
+                    // check if bullet is out of screen
                     if (current_alien_bullet->position.y > SCREEN_HEIGHT - PADDING) {
                         current_alien_bullet->active = OBJ_PASSIVE;
                     }
