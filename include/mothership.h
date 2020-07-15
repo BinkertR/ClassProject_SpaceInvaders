@@ -34,7 +34,7 @@ image_handle_t MothershipLoadImg();
  *  - send diff, ATTACKING/PASSIVE to opponent binary
  *  - move the mothership according to the current direction
 */
-TaskHandle_t MothershipInitAITask(game_objects_t *my_game_objects);
+TaskHandle_t MothershipInitAITask(tasks_and_game_objects_t *tasks_and_game_objects);
 
 
 /**

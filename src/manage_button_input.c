@@ -60,7 +60,6 @@ int manageGameLogicTasks(tasks_and_game_objects_t *tasks_and_game_objects) {
             vTaskSuspend(tasks_and_game_objects->game_task_handlers->tasks[i]);
         }
         // suspend both mothership tasks even though only one should be running
-        vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
         vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
 
     } else if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
