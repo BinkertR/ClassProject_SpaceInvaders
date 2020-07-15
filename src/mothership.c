@@ -126,6 +126,7 @@ void vMothershipAITask(tasks_and_game_objects_t *tasks_and_game_objects)
             if (tasks_and_game_objects->game_objects->mothership->active == OBJ_ACTIVE) {
                 mothership_active = OBJ_ACTIVE;
             }
+            difficulty = tasks_and_game_objects->game_objects->mothership->ai_difficulty;
             xSemaphoreGive(tasks_and_game_objects->game_objects->mothership->lock);
         }
         // send pause/resume if the playmode changed
@@ -175,11 +176,10 @@ void vMothershipAITask(tasks_and_game_objects_t *tasks_and_game_objects)
                 aIOSocketPut(UDP, NULL, UDP_TRANSMIT_PORT, buf, strlen(buf));
             }
 
-
+            // send the difficulty if it has changed
             if (last_difficulty != difficulty) {
-                sprintf(buf, "D%d", difficulty + 1);
-                aIOSocketPut(UDP, NULL, UDP_TRANSMIT_PORT, buf,
-                            strlen(buf));
+                sprintf(buf, "D%d", difficulty);
+                aIOSocketPut(UDP, NULL, UDP_TRANSMIT_PORT, buf, strlen(buf));
                 last_difficulty = difficulty;
             }            
             moveMothership(tasks_and_game_objects->game_objects);

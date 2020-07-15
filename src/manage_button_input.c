@@ -124,6 +124,8 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
     debounceInitValues(L_Debounce, KEYCODE(L));
     debounce_t *P_Debounce = pvPortMalloc(sizeof(debounce_t));
     debounceInitValues(P_Debounce, KEYCODE(P));
+    debounce_t *D_Debounce = pvPortMalloc(sizeof(debounce_t));
+    debounceInitValues(D_Debounce, KEYCODE(D));
 
     while (1) {
         tumEventFetchEvents(FETCH_EVENT_NONBLOCK | FETCH_EVENT_NO_GL_CHECK); // Query events backend for new events, ie. button presses
@@ -262,6 +264,15 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                     }
                     if (buttons.buttons[KEYCODE(SPACE)]) { // shot bullet
                         BulletShoot(my_gameobjects->my_spaceship, my_gameobjects->my_bullet);
+                    }
+                    if (debounceButton(D_Debounce))  {
+                        if (xSemaphoreTake(tasks_and_game_objects->game_objects->mothership->lock, 0) == pdTRUE) {
+                            tasks_and_game_objects->game_objects->mothership->ai_difficulty += 1;
+                            if (tasks_and_game_objects->game_objects->mothership->ai_difficulty > MOTHERSHIP_MAX_AI_DIFFICULTY) {
+                                tasks_and_game_objects->game_objects->mothership->ai_difficulty = 1;
+                            }
+                            xSemaphoreGive(tasks_and_game_objects->game_objects->mothership->lock);
+                        }
                     }
                 }
 

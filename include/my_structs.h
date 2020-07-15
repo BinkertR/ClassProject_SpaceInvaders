@@ -77,6 +77,7 @@
 #define MOTHERSHIP_HEIGHT 20
 #define MOTHERSHIP_SCORE  400
 #define MOTHERHSIP_APPERANCE_CHANCE 2000  // 1 in MOTHERHSIP_APPERANCE_CHANCE
+#define MOTHERSHIP_MAX_AI_DIFFICULTY 3
 
 // aliens
 #define ALIEN_EASY      10
@@ -152,6 +153,7 @@ typedef struct{
     image_handle_t img_h;   // the img_handle which can be used by TUMDraw to draw the picture to the screen
     int active;  // keep track if the mothership is currently active (used to send PAUSE/RESUME)
     int direction; // used to store INC/DEC/HALT in AI Mode
+    int ai_difficulty;
     SemaphoreHandle_t lock;
 }mothership_t;
 

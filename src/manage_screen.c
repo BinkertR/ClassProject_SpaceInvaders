@@ -117,7 +117,8 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
     tumDrawBindThread();
 
     xLastWakeTime = xTaskGetTickCount(); // Initialise the xLastWakeTime variable with the current time.
-    int current_game_state = GAME_PRE_START, current_highscore = 0;
+    int current_game_state = GAME_PRE_START, current_highscore = 0, current_playmode = PLAYMODE_SINGEPLAYER;
+    char Ai_difficulty[50];
 
     while(1) {  //TODO: change this to while the screen is active
         vTaskDelayUntil( &xLastWakeTime, xFrequency );  // start this task every xFrequency millisecond
@@ -155,12 +156,25 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
             //draw score
             if (xSemaphoreTake(tasks_and_game_objects->game_info->lock, 0) == pdTRUE) {
                 current_highscore = tasks_and_game_objects->game_info->highscore;
+                current_playmode = tasks_and_game_objects->game_info->playmode;
                 xSemaphoreGive(tasks_and_game_objects->game_info->lock);
+            }
+            if (current_playmode == PLAYMODE_AI_PLAYER) {
+                if (xSemaphoreTake(tasks_and_game_objects->game_objects->mothership->lock, 0) == pdTRUE) {
+                    sprintf(Ai_difficulty, "|   [D]ifficulty of AI: %d", tasks_and_game_objects->game_objects->mothership->ai_difficulty);
+                    xSemaphoreGive(tasks_and_game_objects->game_objects->mothership->lock);
+                }
+            } else {
+                sprintf(Ai_difficulty, "");
             }
             if (xSemaphoreTake(tasks_and_game_objects->game_objects->score->lock, 0) == pdTRUE) {
                 char score_text[50]; 
-                sprintf(score_text, "Score: %d   |   Highscore: %d   |   Level: %d   |   Lifes: %d   |   [P]ause game", 
-                    tasks_and_game_objects->game_objects->score->current_score, current_highscore, tasks_and_game_objects->game_objects->score->level, tasks_and_game_objects->game_objects->score->lifes_left);
+                sprintf(score_text, "Score: %d   |   Highscore: %d   |   Level: %d   |   Lifes: %d   |   [P]ause game   ", 
+                    tasks_and_game_objects->game_objects->score->current_score, 
+                    current_highscore, 
+                    tasks_and_game_objects->game_objects->score->level, 
+                    tasks_and_game_objects->game_objects->score->lifes_left);
+                strcat(score_text, Ai_difficulty);
                 tumDrawText(&score_text, 0, 0, White);
                 xSemaphoreGive(tasks_and_game_objects->game_objects->score->lock);
             }   
