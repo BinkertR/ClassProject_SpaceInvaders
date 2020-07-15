@@ -344,6 +344,8 @@ void vAlienCalcMatrixTask(game_objects_t *my_gameobjects){
                 }
             }
         }
+
+        // NEW LEVEL
         if (leftest_active_column_int == ALIENS_PER_ROW - 1 && rightest_active_column_int == 0) {
             // player killed all aliens in this stage
             printf("You won this level");

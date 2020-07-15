@@ -171,7 +171,7 @@ void vManageScreenTask(tasks_and_game_objects_t *tasks_and_game_objects){
     vTaskDelete(NULL); 
 }
 
-TaskHandle_t ManageGameScreenInit(tasks_and_game_objects_t *tasks_and_game_objects) {
+TaskHandle_t ManageScreenInit(tasks_and_game_objects_t *tasks_and_game_objects) {
     if (xTaskCreate(vManageScreenTask, "ManageScreenTask", mainGENERIC_STACK_SIZE * 2, tasks_and_game_objects,
                     mainGENERIC_PRIORITY, &ManageScreenTask) != pdPASS) {
         printf("Failed to create Tast MangaeButtonInit");

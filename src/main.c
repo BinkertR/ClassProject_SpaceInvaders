@@ -85,7 +85,7 @@ int create_tasks() {
     // this task will be initialized with a higher priority since it is responsible for managing all the other task
     MangageButtonInit(tasks_and_game_objects);
 
-    ManageGameScreenInit(tasks_and_game_objects);
+    ManageScreenInit(tasks_and_game_objects);
 
     return EXIT_SUCCESS;
 
