@@ -125,6 +125,7 @@ typedef struct{
     coord_t position;  // position of the middle of the mothership
     image_handle_t img_h;   // the img_handle which can be used by TUMDraw to draw the picture to the screen
     int active;  // keep track if the mothership is currently active (used to send PAUSE/RESUME)
+    int direction; // used to store INC/DEC/HALT in AI Mode
     SemaphoreHandle_t lock;
 }mothership_t;
 

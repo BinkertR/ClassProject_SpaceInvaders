@@ -43,6 +43,7 @@ mothership_t *MothershipInit() {
     mothership->position.y = MOTHERSHIP_Y_CO;
     mothership->img_h = MothershipLoadImg();
     mothership->active = 1;
+    mothership->direction = 0;
     mothership->lock = xSemaphoreCreateMutex(); // Locking mechanism
     return mothership;
 }

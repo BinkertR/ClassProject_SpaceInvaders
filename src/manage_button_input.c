@@ -59,9 +59,20 @@ int manageGameLogicTasks(tasks_and_game_objects_t *tasks_and_game_objects) {
         for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
             vTaskSuspend(tasks_and_game_objects->game_task_handlers->tasks[i]);
         }
+        // suspend both mothership tasks even though only one should be running
+        vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
+        vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
+
     } else if (tasks_and_game_objects->game_info->game_state == GAME_RUNNING) {
         for (int i = 0; i < tasks_and_game_objects->game_task_handlers->length; i++) {
             vTaskResume(tasks_and_game_objects->game_task_handlers->tasks[i]);
+        }
+        // resume the right mothership task
+        // WARNING game_info->lock needs to be taken
+        if (tasks_and_game_objects->game_info->playmode == PLAYMODE_AI_PLAYER) {
+            vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
+        } else {
+            vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
         }
     }
 }
@@ -139,12 +150,16 @@ void vManageButtonInputTask(tasks_and_game_objects_t *tasks_and_game_objects){
                     if (debounceButton(P_Debounce) == 1) {                        
                         if (tasks_and_game_objects->game_info->playmode == PLAYMODE_SINGEPLAYER) {
                             tasks_and_game_objects->game_info->playmode = PLAYMODE_AI_PLAYER;
-                            vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
+                            /*vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
                             vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
+                            if (xSemaphoreTake(tasks_and_game_objects->game_objects->mothership->lock, 0) == pdTRUE) {
+                                tasks_and_game_objects->game_objects->mothership->active == OBJ_ACTIVE;
+                                xSemaphoreGive(tasks_and_game_objects->game_objects->mothership->lock);
+                            }*/
                         } else {
                             tasks_and_game_objects->game_info->playmode = PLAYMODE_SINGEPLAYER;
-                            vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
-                            vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);
+                            /*vTaskSuspend(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_AI_PLAYER]);
+                            vTaskResume(tasks_and_game_objects->playmode_task_handlers->tasks[PLAYMODE_SINGEPLAYER]);*/
                         }
                     }
 

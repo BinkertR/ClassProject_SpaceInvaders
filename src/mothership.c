@@ -68,12 +68,13 @@ int MothershipDraw(game_objects_t *game_objects) {
     return 0;
 }
 
-int moveMothership(game_objects_t *game_objects, int direction) {
+int moveMothership(game_objects_t *game_objects) {
     /*!
     @brief moves the mothership into the received direction
     if the mothership goes out at one end of the screen it comes back in at the other end
     */
    if (xSemaphoreTake(game_objects->mothership->lock, 0) == pdTRUE) {
+       int direction = game_objects->mothership->direction;
        game_objects->mothership->position.x += direction * MOTHERSHIP_SPEED;
        if (game_objects->mothership->position.x > SCREEN_WIDTH) {
            game_objects->mothership->position.x -= SCREEN_WIDTH;   // if mothership moves out of the screen on the right side, move it to the left side
@@ -86,12 +87,21 @@ int moveMothership(game_objects_t *game_objects, int direction) {
 }
 
 void UDPHandler(size_t read_size, char *buffer, game_objects_t *game_objects) {
+    int direction = NULL;
     if (strncmp(buffer, "INC", (read_size < 3) ? read_size : 3) == 0) {  // if opponent wants to increment position
-        moveMothership(game_objects, 1);
+        direction = 1;
     } else if (strncmp(buffer, "DEC", (read_size < 3) ? read_size : 3) == 0) {
-        moveMothership(game_objects, -1);
+        direction = -1;
     } else if (strncmp(buffer, "NONE", (read_size < 4) ? read_size : 4) == 0) {
-        moveMothership(game_objects, 0);
+        direction = 0;  /// is this HALT?
+    } else if (strncmp(buffer, "HALT", (read_size < 4) ? read_size : 4) == 0) {
+        direction = 0;
+    }
+    if (direction != NULL) {
+        if (xSemaphoreTake(game_objects->mothership->lock, 0) == pdTRUE) {
+            game_objects->mothership->direction = direction;
+            xSemaphoreGive(game_objects->mothership->lock);
+        }
     }
 }
 
@@ -133,7 +143,7 @@ void vMothershipAITask(game_objects_t *game_objects)
             // compute and send position difference to opponent
             signed int diff = 0;
             if (xSemaphoreTake(game_objects->my_spaceship->lock, 0) == pdTRUE && xSemaphoreTake(game_objects->mothership->lock, 0) == pdTRUE) {
-                diff = game_objects->mothership->position.x - game_objects->my_spaceship->position.x;
+                diff = game_objects->my_spaceship->position.x - game_objects->mothership->position.x;
                 xSemaphoreGive(game_objects->my_spaceship->lock);
                 xSemaphoreGive(game_objects->mothership->lock);
             }
@@ -163,6 +173,10 @@ void vMothershipAITask(game_objects_t *game_objects)
                             strlen(buf));
                 last_difficulty = difficulty;
             }
+        }
+        
+        if (mothership_active == OBJ_ACTIVE) {
+            moveMothership(game_objects);
         }
         vTaskDelay((TickType_t) (SCREEN_FREQUENCY));
     }
